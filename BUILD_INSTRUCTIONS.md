@@ -1,4 +1,4 @@
-#1.0 How to build forSISL
+# 1.0 How to build forSISL
 
   Currently forSISL has only compiled and run on Linux systems but porting to Macs and
 Windows should be straightforward due to the relatively small number of files
@@ -70,19 +70,17 @@ library files to a user define alternative location.
    from ./lib, the .mod files from .modules, and the executable files (.x) and output
    files (.g2) in the example directory.
 
-#2.0 Support for MAC and Windows
+# 2.0 Support for MAC and Windows
    
-    Since I don't have access to a Mac and hell will freeze over before I use
-    a Windows system, I'll leave it to users to figure out how to build
-    forSISL on those systems. Since forSISL consists of a relatively few number
-    of files, it should be straightforward to just copy the source files to
-    some directory and use Xcode or Visual Studio to set up a forSISL project.
-    The Makefile in forSISL/src should show you the order in which the modules must
-    be built.
+   Since I don't have access to a Mac and hell will freeze over before I use a Windows system,
+   I'll leave it to users to figure out how to build forSISL on those systems. Since forSISL
+   consists of a relatively few number of files, it should be straightforward to just copy the
+   source files to some directory and use Xcode or Visual Studio to set up a forSISL project.
+   The Makefile in forSISL/src should show you the order in which the modules must be built.
 
-#3.0 If you have problems (its probably your fault (:>))
+# 3.0 If you have problems (its probably your fault (:>))
 
-    However, send me an email and I'll try to help
+However, send me an email and I'll try to help
 
 
 RW
