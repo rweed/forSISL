@@ -1,0 +1,22 @@
+SHELL = /bin/sh
+
+.SUFFIXES:
+.SUFFIXES: .o .F90 .f90 .f .F .c
+
+.F90.o:
+	$(FC) -c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.f90.o:
+	$(FC) -c $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.F.o:
+	$(FC) -c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.f.o:
+	$(FC) -c $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.c.o:
+	$(CC) -c $(INCLUDES) $(CFLAGS) $< -o $@
+
+clean:
+	rm -rf *.$(MOD) *.$(SMOD) *.o *.a *.optrpt ./*~ ./*.ps */*.ps */*.o */*.$(MOD) */*.$(SMOD) */*~ */*.a ./*.swp ./*.optrpt 

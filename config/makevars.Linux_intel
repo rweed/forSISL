@@ -1,0 +1,17 @@
+FC=$(FCOMPILER)
+CC=$(CCOMPILER)
+LD=$(FC)
+FPP=$(FC) -E
+SO=so
+MAKE=make
+INCLUDES=-I. -I$(INCPATH) -I$(MODPATH)
+DEFINES= $(DEFINEVAL) $(DEBUGDEF) $(EXO_REAL_INT)
+FCFLAGS= $(ARCHTYPE) $(FOPTFLAGS) $(REALLOCLHS) $(WARN) -align -heap-arrays 4 -assume protect_parens -traceback -nogen-interfaces -fPIC -assume nobuffered_stdout
+CFLAGS= $(COPTFLAGS) -traceback -fPIC
+FPEFLAGS=
+DYNLIB=$(FC) -shared -o
+MOD=mod
+SMOD=smod
+RULES=Linux_intel
+AR=ar rcs
+RANLIB=ranlib

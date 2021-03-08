@@ -1,0 +1,394 @@
+#!/usr/bin/env sh 
+
+# set thisdir and prefix to current working dir
+
+THISDIR=`pwd`
+PREFIX=`pwd`
+
+# set paths to config, modules, lib, bin, src, and include subdirs
+
+CONFIGPATH=$THISDIR/config
+MODPATH=$THISDIR/modules
+LIBPATH=$THISDIR/lib
+BINPATH=$THISDIR/bin
+SRCPATH=$THISDIR/src
+INCPATH=$THISDIR/include
+
+DEFAULT_LIBNAME=forsisl
+
+SET_LIBNAME="no"
+
+COMMONLIB=
+USE_PREBUILT_SISL="no"
+PREBUILT_SISL_PATH=
+SISL_PATH=
+SISL_LIBPATH=
+SISL_INCPATH=
+
+# get system and coputer names
+OS=`uname -s`
+COMPUTERNAME=`uname -n`
+
+#set compiler default to gfortran/gcc - not used
+FCOMPILER_DEFAULT=gfortran
+CCOMPILER_DEFAULT=gcc
+# set intial flags to no
+
+
+USE_WARN="no"
+SETCPUTYPE="no"
+SETDEF="no"
+USEDEBUG="no"
+LHSREALLOC="yes"
+COMPILER_VENDOR="gcc"
+SHARED_LIB_EXT="so"
+GCC_VERSION="default"
+WARN=
+OPTFLAGS="-O2 -g"
+FOPTFLAGS="-O2 -g"
+COPTFLAGS="-O2 -g"
+OPTTIM="no"
+FOPTTIM="no"
+COPTTIM="no"
+OPTVAL=
+FOPTVAL=
+COPTVAL=
+REALLOCLHS=
+DEBUGDEF=
+DEFINEVAL=
+EXOINT64="no"
+FCOMPILER=$FCOMPILER_DEFAULT
+CCOMPILER=$CCOMPILER_DEFAULT
+ARCHTYPE=
+NEWLIBNAME=
+
+EXO_REAL_INT="-DDEFAULT_REAL_INT"
+
+if [ "$OS" = "Darwin" ]; then
+  SHARED_LIB_EXT="dylib"
+fi
+ 
+if [ "$OS" = "Windows" ]; then
+  SHARED_LIB_EXT="dll"
+fi
+
+# intialize some local and global variables to blank
+
+OPTIND=1
+
+while getopts :c-:p-: OPTION; do
+  case $OPTION in
+   -) LONG_OPTARG="${OPTARG#*=}"
+       case $OPTARG in
+       compiler=?*) COMPILER_VENDOR="$LONG_OPTARG";;
+       compiler*) echo "No arg for --$OPTARG option" >&2; exit 2;;
+       append-gcc-version=?*) GCC_VERSION="$LONG_OPTARG";;
+       append-gcc-version*) echo "No arg for --$OPTARG option" >&2; exit 2;;
+       prefix=?*) PREFIX="$LONG_OPTARG";;
+       prefix*) echo "No arg for --$OPTARG option" >&2; exit 2;;
+       realloc-lhs=?*) LHSREALLOC="$LONG_OPTARG";;
+
+       sisl-path=?*) PREBUILT_SISL_PATH="$LONG_OPTARG"
+         USE_PREBUILT_SISL="yes";;
+       sisl-path*) echo "No arg for --$OPTARG option" >&2; exit 2;;
+
+       warn=?*) WARNOPT="$LONG_OPTARG"
+         USE_WARN="yes";;
+       define=?*) DEFVAL="$LONG_OPTARG"
+         SETDEF="yes";;
+       opt-level=?*) OPTVAL="$LONG_OPTARG"
+         OPTTIM="yes";;
+       f-opt-level=?*) FOPTVAL="$LONG_OPTARG"
+         FOPTTIM="yes";;
+       c-opt-level=?*) COPTVAL="$LONG_OPTARG"
+         COPTTIM="yes";;
+       cpu-type=?*) CPUTYPE="$LONG_OPTARG"
+         SETCPUTYPE="yes";;
+       set-libname=?*) NEWLIBNAME="$LONG_OPTARG"
+         SET_LIBNAME="yes";;
+       turn-debug-on=?*) USEDEBUG="$LONG_OPTARG";;
+       esac;;
+    esac
+done
+
+# test for compilers and set options. default optimization is -O0,
+# default warn and reallocate lhs is not set. set realloc-lhs=yes or
+# realloc-lhs=no to explicitly set flags to turn on or off realloc
+
+# default is gfortran
+
+if [ "$COMPILER_VENDOR" = "gcc" ]; then
+  COMPILERVARS=$OS"_gcc"
+
+ if [ "$GCC_VERSION" = "8" ]; then
+   COMPILER_VENDOR="gcc8"
+ fi
+ if [ "$GCC_VERSION" = "9" ]; then
+   COMPILER_VENDOR="gcc9"
+ fi
+ if [ "$GCC_VERSION" = "10" ]; then
+   COMPILER_VENDOR="gcc10"
+ fi
+ if [ "$GCC_VERSION" = "default" ]; then
+   FCOMPILERVERSION=$( gfortran --version | grep -i fortran)
+   CCOMPILERVERSION=$( gcc --version | grep -i gcc)
+   FCOMPILER="gfortran"
+   CCOMPILER="gcc"
+ fi
+ if [ "$LHSREALLOC" = "yes" ]; then
+   REALLOCLHS="-frealloc-lhs"
+ fi 
+ if [ "$LHSREALLOC" = "no" ]; then
+   REALLOCLHS="-fno-realloc-lhs"
+ fi
+ if [ "$USE_WARN" = "yes" ]; then
+   WARN="-W$WARNOPT"
+ fi
+ if [ "$OPTTIM" = "yes" ]; then
+   FOPTFLAGS="-O$OPTVAL -g"
+   COPTFLAGS="-O$OPTVAL -g"
+ fi
+ if [ "$FOPTTIM" = "yes" ]; then
+   FOPTFLAGS="-O$FOPTVAL -g"
+ fi
+ if [ "$COPTTIM" = "yes" ]; then
+   COPTFLAGS="-O$COPTVAL -g"
+ fi
+fi
+
+# intel (probably should be default now that its free)
+
+if [ "$COMPILER_VENDOR" = "intel" ]; then
+  COMPILERVARS=$OS"_intel"
+  FCOMPILERVERSION=$( ifort --version | grep ifort)
+  CCOMPILERVERSION=$( icc --version | grep icc)
+  FCOMPILER="ifort"
+  CCOMPILER="icc"
+  if [ "$LHSREALLOC" = "yes" ]; then
+    REALLOCLHS="-assume realloc_lhs"
+  fi 
+  if [ "$LHSREALLOC" = "no" ]; then
+    REALLOCLHS="-assume norealloc_lhs"
+  fi
+  if [ "$USE_WARN" = "yes" ]; then
+    WARN="-warn $WARNOPT"
+  fi
+  if [ "$OPTTIM" = "yes" ]; then
+    FOPTFLAGS="-O$OPTVAL -g"
+    COPTFLAGS="-O$OPTVAL -g"
+  fi
+  if [ "$FOPTTIM" = "yes" ]; then
+    FOPTFLAGS="-O$FOPTVAL -g"
+  fi
+  if [ "$COPTTIM" = "yes" ]; then
+    COPTFLAGS="-O$COPTVAL -g"
+  fi
+  if [ "$SETCPUTYPE" = "yes" ]; then
+    ARCHTYPE="-arch $CPUTYPE"
+  fi
+fi
+
+ if [ "$COMPILER_VENDOR" = "nvidia" ]; then
+  COMPILERVARS=$OS"_nvidia"
+  FCOMPILERVERSION=`nvfortran --version`
+  CCOMPILERVERSION=`nvcc --version`
+  FCOMPILER="nvfortran"
+  CCOMPILER="nvcc"
+ if [ "$LHSREALLOC" = "yes" ]; then
+   REALLOCLHS="-Mallocatable=03"
+ fi 
+ if [ "$LHSREALLOC" = "no" ]; then
+   REALLOCLHS="-Mallocatable=95"
+ fi
+  if [ "$USE_WARN" = "yes" ]; then
+    WARN="-Minform=$WARNOPT"
+  fi
+  if [ "$OPTTIM" = "yes" ]; then
+    FOPTFLAGS="-O$OPTVAL -g"
+    COPTFLAGS="-O$OPTVAL -g"
+  fi
+  if [ "$FOPTTIM" = "yes" ]; then
+    FOPTFLAGS="-O$FOPTVAL -g"
+  fi
+  if [ "$COPTTIM" = "yes" ]; then
+    COPTFLAGS="-O$COPTVAL -g"
+  fi
+ fi
+
+# different gcc versions - assumes more than one installed on your system
+
+#gcc 8 
+ if [ "$COMPILER_VENDOR" = "gcc8" ]; then
+   COMPILERVARS=$OS"_gcc"
+   FCOMPILERVERSION=$(gfortran-8 --version | grep "Fortran")
+   CCOMPILERVERSION=$(gcc-8 --version | grep "gcc")
+   FCOMPILER="gfortran-8"
+   CCOMPILER="gcc-8"
+   if [ "$LHSREALLOC" = "yes" ]; then
+     REALLOCLHS="-frealloc-lhs"
+   fi 
+   if [ "$LHSREALLOC" = "no" ]; then
+     REALLOCLHS="-fno-realloc-lhs"
+   fi
+   if [ "$USE_WARN" = "yes" ]; then
+     WARN="-W$WARNOPT"
+   fi
+   if [ "$OPTTIM" = "yes" ]; then
+     FOPTFLAGS="-O$OPTVAL -g"
+     COPTFLAGS="-O$OPTVAL -g"
+   fi
+   if [ "$FOPTTIM" = "yes" ]; then
+     FOPTFLAGS="-O$FOPTVAL -g"
+   if [ "$COPTTIM" = "yes" ]; then
+     COPTFLAGS="-O$COPTVAL -g"
+   fi
+   fi
+ fi
+
+ if [ "$COMPILER_VENDOR" = "gcc9" ]; then
+   COMPILERVARS=$OS"_gcc"
+   FCOMPILERVERSION=$(gfortran-9 --version | grep "Fortran")
+   CCOMPILERVERSION=$(gcc-9 --version | grep "gcc")
+   FCOMPILER="gfortran-9"
+   CCOMPILER="gcc-9"
+   if [ "$LHSREALLOC" = "yes" ]; then
+     REALLOCLHS="-frealloc-lhs"
+   fi 
+   if [ "$LHSREALLOC" = "no" ]; then
+     REALLOCLHS="-fno-realloc-lhs"
+   fi
+   if [ "$USE_WARN" = "yes" ]; then
+     WARN="-W$WARNOPT"
+   fi
+   if [ "$OPTTIM" = "yes" ]; then
+     FOPTFLAGS="-O$OPTVAL -g"
+     COPTFLAGS="-O$OPTVAL -g"
+   fi
+   if [ "$FOPTTIM" = "yes" ]; then
+     FOPTFLAGS="-O$FOPTVAL -g"
+   fi
+   if [ "$COPTTIM" = "yes" ]; then
+     COPTFLAGS="-O$COPTVAL -g"
+   fi
+ fi
+
+ if [ "$COMPILER_VENDOR" = "gcc10" ]; then
+   COMPILERVARS=$OS"_gcc"
+   FCOMPILERVERSION=$(gfortran-10 --version | grep "Fortran")
+   CCOMPILERVERSION=$(gcc-10 --version | grep "gcc")
+   FCOMPILER="gfortran-10"
+   CCOMPILER="gcc-10"
+   if [ "$LHSREALLOC" = "yes" ]; then
+     REALLOCLHS="-frealloc-lhs"
+   fi 
+   if [ "$LHSREALLOC" = "no" ]; then
+     REALLOCLHS="-fno-realloc-lhs"
+   fi
+   if [ "$USE_WARN" = "yes" ]; then
+     WARN="-W$WARNOPT"
+   fi
+   if [ "$OPTTIM" = "yes" ]; then
+     FOPTFLAGS="-O$OPTVAL -g"
+     COPTFLAGS="-O$OPTVAL -g"
+   fi
+   if [ "$FOPTTIM" = "yes" ]; then
+     FOPTFLAGS="-O$FOPTVAL -g"
+   fi
+   if [ "$COPTTIM" = "yes" ]; then
+     COPTFLAGS="-O$COPTVAL -g"
+   fi
+ fi
+
+if [ "$USE_PREBUILT_SISL" = "yes" ]; then
+  SISL_PATH=$PREBUILT_SISL_PATH
+  SISL_LIBPATH=$SISL_PATH/lib/$COMPILER_VENDOR
+  SISL_INCPATH=$SISL_PATH/include
+  BUILD_SISL="no"
+fi
+
+if [ "$USEDEBUG" = "yes" ]; then
+   DEBUGDEF="-DDBG -DDEBUG"
+ fi
+ if [ "$SETDEF" = "true" ]; then
+   DEFINEVAL="-D$DEFVAL"
+ fi
+if [ ! -s "$THISDIR/config/makevars.$COMPILERVARS" ]
+then
+ echo "$COMPILERVARS is not supported!"
+ return 1
+fi
+
+if [ "$SET_LIBNAME" = "yes" ]; then
+   COMMONLIB=$NEWLIBNAME
+else
+   COMMONLIB=$DEFAULT_LIBNAME
+fi 
+
+echo " "
+echo " Building forSISL on : $OS system $COMPUTERNAME using the $COMPILER_VENDOR Compiler : "
+echo " "
+echo "  *** Base PATHS set to: "
+echo " "
+echo " THISDIR       set to : $THISDIR"
+echo " PREFIX        set to : $PREFIX"
+echo " CONFIGPATH    set to : $CONFIGPATH"
+echo " SRCPATH       set to : $SRCPATH"
+echo " INCPATH       set to : $INCPATH"
+echo " MODPATH       set to : $MODPATH"
+echo " LIBPATH       set to : $LIBPATH"
+echo " BINPATH       set to : $BINPATH"
+echo " "
+echo " *** SISL PATHS set to: "
+echo " "
+echo " SISL_PATH     set to : $SISL_PATH"
+echo " SISL_LIBPATH  set to : $SISL_LIBPATH"
+echo " "
+echo "  ***** Compilers and compiler options set to: "
+echo " "
+
+echo " Fortran Compiler set to : $FCOMPILERVERSION"
+echo " C       Compiler set to : $CCOMPILERVERSION"
+echo " "
+echo " Fortran Compiler Options set to"
+echo " "
+echo " ARCHTYPE         set to : $ARCHTYPE"
+echo " Fortran OPTFLAGS set to : $FOPTFLAGS"
+echo " WARN             set to : $WARN"
+echo " REALLOCLHS       set to : $REALLOCLHS"
+echo " DEFINEVAL        set to : $DEFINEVAL"
+echo " DEBUGDEF         set to : $DEBUGDEF"
+echo " COMMONLIB        set to : $COMMONLIB"
+echo " "
+echo " C Compiler Options set to"
+echo " "
+echo " C OPTFLAGS       set to : $COPTFLAGS"
+echo " "
+echo " COMPILERVARS  set to : $COMPILERVARS"
+echo " "
+
+# export shell variables to parent environment so make can see them
+
+export OS
+export THISDIR
+export CONFIGPATH
+export SRCPATH
+export INCPATH
+export MODPATH
+export LIBPATH
+export BINPATH
+export COMPILERVARS
+export FCOMPILER
+export CCOMPILER
+export FOPTFLAGS
+export COPTFLAGS
+export REALLOCLHS
+export ARCHTYPE 
+export WARN
+export DEFINEVAL
+export DEBUGDEF
+export PREFIX
+export SISL_PATH
+export SISL_LIBPATH
+export COMMONLIB
+ 
+#end of script

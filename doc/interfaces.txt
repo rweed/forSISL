@@ -1,0 +1,4185 @@
+
+1.0 forSISL data
+
+
+! C structures for interfacing with SISL functions
+ 
+  Type, BIND(C) :: c_SISLdir  ! C direction cone object
+
+    Integer(C_INT) :: igtpi   = 0_C_INT
+    Type(C_PTR)    :: ecoef   = C_NULL_PTR
+    Real(C_DOUBLE) :: aang    = 0.0_C_DOUBLE
+    Type(C_PTR)    :: esmooth = C_NULL_PTR
+  End Type
+
+  Type, BIND(C) :: c_SISLbox  ! C bounding box object
+
+    Type(C_PTR)    :: emax      = C_NULL_PTR
+    Type(C_PTR)    :: emin      = C_NULL_PTR
+    Integer(C_INT) :: imin      = 0_C_INT
+    Integer(C_INT) :: imax      = 0_C_INT
+    Type(C_PTR)    :: e2max(3)  = [C_NULL_PTR, C_NULL_PTR, C_NULL_PTR]
+    Type(C_PTR)    :: e2min(3)  = [C_NULL_PTR, C_NULL_PTR, C_NULL_PTR]
+    Real(C_DOUBLE) :: etol(3)   = [0.0_C_DOUBLE, 0.0_C_DOUBLE, 0.0_C_DOUBLE]
+  End Type
+
+  Type, BIND(C) :: c_SISLSegmentation ! C segmentation object
+
+    Type(C_PTR)    :: seg_val  = C_NULL_PTR
+    Type(C_PTR)    :: seg_type = C_NULL_PTR
+    Integer(C_INT) :: num_seg  = 0_C_INT
+
+  End Type
+
+  Type, BIND(C) :: c_SISLCurve  ! C curve object
+
+    Integer(C_INT) :: ik     = 0_C_INT
+    Integer(C_INT) :: in     = 0_C_INT
+    Type(C_PTR)    :: et     = C_NULL_PTR
+    Type(C_PTR)    :: ecoef  = C_NULL_PTR
+    Type(C_PTR)    :: rcoef  = C_NULL_PTR
+    Integer(C_INT) :: ikind  = 0_C_INT
+    Integer(C_INT) :: idim   = 0_C_INT
+    Integer(C_INT) :: icopy  = 0_C_INT
+    Type(C_PTR)    :: pdir   = C_NULL_PTR
+    Type(C_PTR)    :: pbox   = C_NULL_PTR
+    Integer(C_INT) :: cuopen = 0_C_INT
+
+  End Type
+
+  Type, BIND(C) :: c_SISLsurf   ! C surf object
+
+    Integer(C_INT) :: ik1       = 0_C_INT
+    Integer(C_INT) :: ik2       = 0_C_INT
+    Integer(C_INT) :: in1       = 0_C_INT
+    Integer(C_INT) :: in2       = 0_C_INT
+    Type(C_PTR)    :: et1       = C_NULL_PTR
+    Type(C_PTR)    :: et2       = C_NULL_PTR
+    Type(C_PTR)    :: ecoef     = C_NULL_PTR
+    Type(C_PTR)    :: rcoef     = C_NULL_PTR
+    Integer(C_INT) :: ikind     = 0_C_INT
+    Integer(C_INT) :: idim      = 0_C_INT
+    Integer(C_INT) :: icopy     = 0_C_INT
+    Type(C_PTR)    :: pdir      = C_NULL_PTR
+    Type(C_PTR)    :: pbox      = C_NULL_PTR
+    Integer(C_INT) :: use_count = 0_C_INT
+    Integer(C_INT) :: cuopen_1   = 0_C_INT
+    Integer(C_INT) :: cuopen_2   = 0_C_INT
+    Type(C_PTR)    :: seg1      = C_NULL_PTR
+    Type(C_PTR)    :: seg2      = C_NULL_PTR
+    Integer(C_INT) :: sf_type   = 0_C_INT
+
+  End Type
+
+  Type, BIND(C) :: c_SISLIntCurve ! C interface curve object
+
+    Integer(C_INT) :: ipoint    = 0_C_INT 
+    Integer(C_INT) :: ipar1     = 0_C_INT 
+    Integer(C_INT) :: ipar2     = 0_C_INT
+    Type(C_PTR)    :: epar1     = C_NULL_PTR
+    Type(C_PTR)    :: epar2     = C_NULL_PTR
+    Type(C_PTR)    :: pgeom     = C_NULL_PTR
+    Type(C_PTR)    :: ppar1     = C_NULL_PTR
+    Type(C_PTR)    :: ppar2     = C_NULL_PTR
+    Integer(C_INT) :: itype     = 0_C_INT 
+    Integer(C_INT) :: pretop(4) = [0_C_INT, 0_C_INT, 0_C_INT, 0_C_INT]
+
+  End Type
+
+  Type :: R64_p  ! Local container to hold a Fortran REAL64 pointer instance
+    Real(REAL64), Pointer :: ptr(:) => NULL()
+  End Type
+
+
+  Type :: SISLdir  ! Fortran direction cone object
+
+    Integer               :: igtpi      = 0 
+    Real(REAL64)          :: aang       = 0.0_REAL64
+    Real(REAL64), Pointer :: ecoef(:)   => NULL() 
+    Real(REAL64), Pointer :: esmooth(:) => NULL()
+    Type(C_PTR)           :: cptr       = C_NULL_PTR
+  End Type
+
+  Type  :: SISLbox ! Fortran bounding box object
+
+    Integer               :: imin     = 0
+    Integer               :: imax     = 0
+    Real(REAL64), Pointer :: emax(:)  => NULL()  
+    Real(REAL64), Pointer :: emin(:)  => NULL()
+    Type(R64_p)           :: e2max(3)
+    Type(R64_p)           :: e2min(3)
+    Real(REAL64)          :: etol(3)  = [0.0_REAL64, 0.0_REAL64, 0.0_REAL64]
+    Type(C_PTR)           :: cptr     = C_NULL_PTR
+  End Type
+
+  Type :: SISLSegmentation ! Fortran segmentation object
+
+    Real(REAL64), Pointer  :: seg_val(:) => NULL()
+    Integer,      Pointer  :: seg_type(:) => NULL() 
+    Integer                :: num_seg    = 0
+    Type(C_PTR)            :: cptr     = C_NULL_PTR
+  End Type
+
+  Type :: SISLCurve   ! Fortran curve object
+
+    Integer                :: ik        = 0
+    Integer                :: in        = 0
+    Real(REAL64), Pointer  :: et(:)     => NULL()
+    Real(REAL64), Pointer  :: ecoef(:)  => NULL() 
+    Real(REAL64), Pointer  :: rcoef(:)  => NULL()
+    Integer                :: ikind     = 0
+    Integer                :: idim      = 0
+    Integer                :: icopy     = 0
+    Type(SISLdir)          :: pdir      
+    Type(SISLbox)          :: pbox        
+    Integer                :: cuopen    = 0
+    Type(C_PTR)            :: cptr  = C_NULL_PTR
+  End Type
+
+  Type :: SISLsurf   ! Fortran surf object
+
+    Integer                 :: ik1      = 0
+    Integer                 :: ik2      = 0
+    Integer                 :: in1      = 0
+    Integer                 :: in2      = 0
+    Real(REAL64), Pointer   :: et1(:)   => NULL()
+    Real(REAL64), Pointer   :: et2(:)   => NULL()
+    Real(REAL64), Pointer   :: ecoef(:) => NULL() 
+    Real(REAL64), Pointer   :: rcoef(:) => NULL()
+    Integer                 :: ikind    = 0
+    Integer                 :: idim     = 0
+    Integer                 :: icopy    = 0
+    Type(SISLdir)           :: pdir
+    Type(SISLbox)           :: pbox
+    Integer                 :: use_count = 0
+    Integer                 :: cuopen_1  = 0
+    Integer                 :: cuopen_2  = 0
+    Type(SISLSegmentation)  :: seg1
+    Type(SISLSegmentation)  :: seg2
+    Integer                 :: sf_type  = 0
+    Type(C_PTR)             :: cptr  = C_NULL_PTR
+
+  End Type
+
+  Type :: SISLIntCurve   ! Fortran interface curve object
+
+    Integer                  :: ipoint    = 0 
+    Integer                  :: ipar1     = 0 
+    Integer                  :: ipar2     = 0
+    Real(REAL64),    Pointer :: epar1(:)  => NULL() 
+    Real(REAL64),    Pointer :: epar2(:)  => NULL()
+    Type(SISLCurve)          :: pgeom
+    Type(SISLCurve)          :: ppar1
+    Type(SISLCurve)          :: ppar2
+    Integer                  :: itype     = 0 
+    Integer                  :: pretop(4) = [0, 0, 0, 0]
+    Type(C_PTR)              :: cptr = C_NULL_PTR 
+  End Type
+
+
+  Subroutine curveCtoF(curve)
+
+!! PURPOSE
+!!   curveCtoF maps data from the C curve object to Fortran curve object
+
+!! INTERFACE
+!!   Subroutine curveCtoF(curve)
+!!     Type(SISLcurve), Intent(INOUT) :: curve
+
+  
+  Subroutine dirCtoF(idim, dir)
+
+!! PURPOSE
+!!   dirCtoF maps data from the C direction cone object to Fortran dir object
+
+!! INTERFACE
+!!   Subroutine dirCtoF(idim, dir)
+!!     Integer,       Intent(IN)    :: idim
+!!     Type(SISLdir), Intent(INOUT) :: dir
+
+ 
+  Subroutine boxCtoF(idim, box)
+
+!! PURPOSE
+!!   boxCtoF maps data from the C bounding box object to Fortran box object
+
+!! INTERFACE
+!!   Subroutine boxCtoF(idim, box)
+!!     Integer,       Intent(IN)    :: idim
+!!     Type(SISLbox), Intent(INOUT) :: box
+
+
+  Subroutine IntCurveCtoF(intCurve)
+
+!! PURPOSE
+!!   IntCurveCtoF maps data from C intersection curve object to Fortran IntCurve
+!!   object
+
+!! INTERFACE
+!!   Subroutine IntCurveCtoF(intCurve)
+!!     Type(SISLIntCurve), Target, Intent(INOUT) :: intCurve
+
+
+  Subroutine surfCtoF(surf)
+
+!! PURPOSE
+!!   surfCtoF maps data from C surf object to Fortran surf object
+
+!! INTERFACE
+!!   Subroutine surfCtoF(surf)
+!!     Type(SISLsurf), Intent(INOUT) :: surf
+
+
+
+2.0 Curve Definition
+
+
+
+!---------------------------------- s1602 -------------------------------------
+ 
+  Subroutine s1602(startpt, endpt, order, dim, startpar, endpar, curve, stat)
+
+!! PURPOSE
+!!   s1602 - Creates a staight line represented as a B-spline curve between two
+!!           points
+
+!! INTERFACE
+
+!!  Subroutine s1602(startpt, endpt, order, dim, startpar, endpar, curve, stat)
+!!    Real(REAL64),    Intent(IN)    :: startpt(*)
+!!    Real(REAL64),    Intent(IN)    :: endpt(*)
+!!    Integer,         Intent(IN)    :: order 
+!!    Integer,         Intent(IN)    :: dim
+!!    Real(REAL64),    Intent(IN)    :: startpar 
+!!    Real(REAL64),    Intent(INOUT) :: endpar
+!!    Type(SISLcurve), Intent(INOUT) :: curve
+!!    Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1356 -------------------------------------
+
+  Subroutine s1356(epoint, inbpnt, idim, nptyp, icnsta, icnend, iopen, ik,     &
+                   astpar, cendpar, rc, gpar, jnbpar, jstat)
+
+!! PURPOSE
+!!   s1356 - Compute a curve interpolating a set of points. The points can be
+!!           assigned a tangent (derivative). The parameterization of the curve
+!!           will be generated and the curve can be open, closed non-periodic
+!!           or periodic. If end-conditions are conflicting, the closed curve
+!!           rules out other end conditions. The output will be represented as 
+!!           a B-spline curve.  
+
+!! INTERFACE
+!!    Subroutine s1356(epoint, inbpnt, idim, nptyp, icnsta, icnend, iopen, ik, &
+!!                     astpar, cendpar, rc, gpar, jnbpar, jstat)
+!!      Real(REAL64),                   Intent(IN)    :: epoint(*)
+!!      Integer,                        Intent(IN)    :: inbpnt
+!!      Integer,                        Intent(IN)    :: idim
+!!      Integer,                        Intent(IN)    :: nptyp(*)
+!!      Integer,                        Intent(IN)    :: icnsta
+!!      Integer,                        Intent(IN)    :: icnend
+!!      Integer,                        Intent(IN)    :: iopen
+!!      Integer,                        Intent(IN)    :: ik
+!!      Real(REAL64),                   Intent(IN)    :: astpar
+!!      Real(REAL64),                   Intent(INOUT) :: cendpar
+!!      Type(SISLCURVE),                Intent(INOUT) :: rc
+!!      Real(REAL64),    ALLOCATABLE,   Intent(INOUT) :: gpar(:)
+!!      Integer,                        Intent(INOUT) :: jnbpar
+!!      Integer,                        Intent(INOUT) :: jstat
+
+!---------------------------------- s1357 -------------------------------------
+
+  Subroutine s1357(epoint, inbpnt, idim, nptyp, epar, icnsta, icnend, iopen,   &
+                   ik, astpar, cendpar, rc, gpar, jnbpar, jstat)
+
+!! PURPOSE
+!!   s1357 - Compute a curve interpolating a set of points. The points can be
+!!           assigned a tangent (derivative). The curve can be open, closed
+!!            or periodic. If end-conditions are conflicting, the closed
+!!            curve rules out other end conditions. The parameterization is
+!!            given by the array epar. The output will be represented as a
+!!            B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1357(epoint, inbpnt, idim, nptyp, epar, icnsta, icnend, iopen,&
+!!                    ik, astpar, cendpar, rc, gpar, jnbpar, jstat)
+!!     Real(REAL64),                 Intent(IN)    :: epoint(*)
+!!     Integer,                      Intent(IN)    :: inbpnt
+!!     Integer,                      Intent(IN)    :: idim
+!!     Integer,                      Intent(IN)    :: nptyp(*)
+!!     Real(REAL64),                 Intent(IN)    :: epar(*)
+!!     Integer,                      Intent(IN)    :: icnsta 
+!!     Integer,                      Intent(IN)    :: icnend 
+!!     Integer,                      Intent(IN)    :: iopen 
+!!     Integer,                      Intent(IN)    :: ik
+!!     Real(REAL64),                 Intent(IN)    :: astpar
+!!     Real(REAL64),                 Intent(INOUT) :: cendpar
+!!     Type(SISLCURVE),              Intent(INOUT) :: rc
+!!     Real(REAL64),    ALLOCATABLE, Intent(INOUT) :: gpar(:)
+!!     Integer,                      Intent(INOUT) :: jnbpar 
+!!     Integer,                      Intent(INOUT) :: jstat
+!!     Implicit NONE
+
+!---------------------------------- s1380 -------------------------------------
+
+  Subroutine s1380(point, derivate, numpt, dim, typepar, curve, stat)
+
+!! PURPOSE
+!!   s1380 - Computes the cubic Hermite interpolant to the data given by the
+!!   points point and the derivatives derivate. The output is represented as
+!!   a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1380(point, derivate, numpt, dim, typepar, curve, stat)
+!!     Real(REAL64),    Intent(IN)    :: point(*)
+!!     Real(REAL64),    Intent(IN)    :: derivate(*)
+!!     Integer,         Intent(IN)    :: numpt 
+!!     Integer,         Intent(IN)    :: dim
+!!     Integer,         Intent(IN)    :: typepar 
+!!     Type(SISLcurve), Intent(INOUT) :: curve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1379 -------------------------------------
+
+  Subroutine s1379(point, derivate, par, numpt, dim, curve, stat)
+
+!! PURPOSE
+!!   s1379 - Computes the cubic Hermite interpolant to the data given by the
+!!           points point and the derivatives derivate and the parameterization
+!!           par. The output is represented as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1379(point, derivate, par, numpt, dim, curve, stat)
+!!     Real(REAL64),    Intent(IN)    :: point(*)
+!!     Real(REAL64),    Intent(IN)    :: derivate(*)
+!!     Real(REAL64),    Intent(IN)    :: par(*)
+!!     Integer,         Intent(IN)    :: numpt 
+!!     Integer,         Intent(IN)    :: dim
+!!     Type(SISLcurve), Intent(INOUT) :: curve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1607 -------------------------------------
+
+  Subroutine s1607(curve1, curve2, epsge, end1, fillpar1, end2, fillpar2,      &
+                   filltype, dim, order, newcurve, stat)
+
+!! PURPOSE
+!!   s1607 - Calculates a fillet curve between two curves. The start and end
+!!           point for the fillet is given as one parameter value for each of 
+!!           the curves. The output is represented as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1607(curve1, curve2, epsge, end1, fillpar1, end2, fillpar2,   &
+!!                    filltype, dim, order, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve1 
+!!     Type(SISLcurve), Intent(IN)    :: curve2 
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(IN)    :: end1 
+!!     Real(REAL64),    Intent(IN)    :: fillpar1 
+!!     Real(REAL64),    Intent(IN)    :: end2 
+!!     Real(REAL64),    Intent(IN)    :: fillpar2 
+!!     Integer,         Intent(IN)    :: filltype 
+!!     Integer,         Intent(IN)    :: dim
+!!     Integer,         Intent(IN)    :: order 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1608 -------------------------------------
+
+  Subroutine s1608(curve1, curve2, epsge, point1, startpt1, point2, endpt2,    &
+                   filltype, dim, order, newcurve, parpt1, parspt1, parpt2,   &
+                   parept2, stat)
+
+!! PURPOSE
+!!   s1608 - Calculates a fillet curve between two curves. Points indicate be-
+!!           tween which points on the input curve the fillet is to be produced.
+!!           The output is represented as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1608(curve1, curve2, epsge, point1, startpt1, point2, endpt2, &
+!!                    filltype, dim, order, newcurve, parpt1, parspt1, parpt2, &
+!!                    parept2, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve1 
+!!     Type(SISLcurve), Intent(IN)    :: curve2 
+!!     Real(REAL64),    Intent(IN)    :: epsge
+!!     Real(REAL64),    Intent(IN)    :: point1(*) 
+!!     Real(REAL64),    Intent(IN)    :: startpt1(*)
+!!     Real(REAL64),    Intent(IN)    :: point2(*) 
+!!     Real(REAL64),    Intent(IN)    :: endpt2(*) 
+!!     Integer,         Intent(IN)    :: filltype 
+!!     Integer,         Intent(IN)    :: dim
+!!     Integer,         Intent(IN)    :: order 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Real(REAL64),    Intent(INOUT) :: parpt1
+!!     Real(REAL64),    Intent(INOUT) :: parspt1
+!!     Real(REAL64),    Intent(INOUT) :: parpt2
+!!     Real(REAL64),    Intent(INOUT) :: parept2
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1609 -------------------------------------
+
+  Subroutine s1609(curve1, curve2, epsge, point1, pointf, point2,  radius,     &
+                   normal, filltype, dim, order, newcurve, parend1, parspt1,   &
+                   parend2, parept2, stat)
+!! PURPOSE
+!!   s1609 - Calculates a constant radius fillet curve between two curves if
+!!           possible. The output is represented as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1609(curve1, curve2, epsge, point1, pointf, point2,  radius,  &
+!!                   normal, filltype, dim, order, newcurve, parend1, parspt1, &
+!!                   parend2, parept2, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve1 
+!!     Type(SISLcurve), Intent(IN)    :: curve2 
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(IN)    :: point1(*) 
+!!     Real(REAL64),    Intent(IN)    :: pointf(*) 
+!!     Real(REAL64),    Intent(IN)    :: point2(*) 
+!!     Real(REAL64),    Intent(IN)    :: radius 
+!!     Real(REAL64),    Intent(IN)    :: normal(*) 
+!!     Integer,         Intent(IN)    :: filltype 
+!!     Integer,         Intent(IN)    :: dim
+!!     Integer,         Intent(IN)    :: order 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Real(REAL64),    Intent(INOUT) :: parend1
+!!     Real(REAL64),    Intent(INOUT) :: parspt1
+!!     Real(REAL64),    Intent(INOUT) :: parend2
+!!     Real(REAL64),    Intent(INOUT) :: parept2
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1014 -------------------------------------
+
+  Subroutine s1014(pc1, circ_cen, circ_rad, aepsge, eps1, eps2, aradius,       &
+                   parpt1, parpt2, centre, jstat) 
+
+!! PURPOSE
+!!   s1014 - Computes a circular fillet by iterating to the start and end points
+!!           of a fillet between a 2D curve and a circle. The centre of the
+!!           circular fillet is also calculated
+
+!! INTERFACE
+!!   Subroutine s1014(pc1, circ_cen, circ_rad, aepsge, eps1, eps2, aradius,    &
+!!                     parpt1, parpt2, centre, jstat) 
+!!     Type(SISLcurve), Intent(IN)    :: pc1 
+!!     Real(REAL64),    Intent(IN)    :: circ_cen(*)
+!!     Real(REAL64),    Intent(IN)    :: circ_rad 
+!!     Real(REAL64),    Intent(IN)    :: aepsge 
+!!     Real(REAL64),    Intent(IN)    :: eps1(*) 
+!!     Real(REAL64),    Intent(IN)    :: eps2(*) 
+!!     Real(REAL64),    Intent(IN)    :: aradius 
+!!     Real(REAL64),    Intent(INOUT) :: parpt1
+!!     Real(REAL64),    Intent(INOUT) :: parpt2
+!!     Real(REAL64),    Intent(INOUT) :: centre(*) 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1015 -------------------------------------
+
+  Subroutine s1015(pc1, pc2,  aepsge, eps1, eps2, aradius, parpt1, parpt2,     &
+                   centre, jstat) 
+
+!! PURPOSE
+!!   s1015 - Computes a fillet by iterating to the start and end points of a
+!!           fillet between two 2D curves. The centre of the circular fillet is
+!!           also calculated.
+
+!! INTERFACE
+!!   Subroutine s1015(pc1, pc2,  aepsge, eps1, eps2, aradius, parpt1, parpt2, &
+!!                    centre, jstat) 
+!!     Type(SISLcurve), Intent(IN)    :: pc1 
+!!     Type(SISLcurve), Intent(IN)    :: pc2 
+!!     Real(REAL64),    Intent(IN)    :: aepsge 
+!!     Real(REAL64),    Intent(IN)    :: eps1(*) 
+!!     Real(REAL64),    Intent(IN)    :: eps2(*) 
+!!     Real(REAL64),    Intent(IN)    :: aradius 
+!!     Real(REAL64),    Intent(INOUT) :: parpt1
+!!     Real(REAL64),    Intent(INOUT) :: parpt2
+!!     Real(REAL64),    Intent(INOUT) :: centre(*) 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1016 -------------------------------------
+
+  Subroutine s1016(pc1, point, normal,  aepsge, eps1, eps2, aradius, parpt1,   &
+                   parpt2, centre, jstat) 
+
+!! PURPOSE
+!!   s1016 - Compute the fillet by iterating to the start and end points of a
+!!           fillet between a 2D curve and a 2D line. The centre of the circular
+!!           fillet is also calculated
+
+!! INTERFACE
+!!   Subroutine s1016(pc1, point, normal,  aepsge, eps1, eps2, aradius, parpt1,&
+!!                    parpt2, centre, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pc1 
+!!     Real(REAL64),    Intent(IN)    :: point(*) 
+!!     Real(REAL64),    Intent(IN)    :: normal(*) 
+!!     Real(REAL64),    Intent(IN)    :: aepsge 
+!!     Real(REAL64),    Intent(IN)    :: eps1(*) 
+!!     Real(REAL64),    Intent(IN)    :: eps2(*) 
+!!     Real(REAL64),    Intent(IN)    :: aradius 
+!!     Real(REAL64),    Intent(INOUT) :: parpt1
+!!     Real(REAL64),    Intent(INOUT) :: parpt2
+!!     Real(REAL64),    Intent(INOUT) :: centre(*) 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1606 -------------------------------------
+
+  Subroutine s1606(curve1, curve2, epsge, point1, point2, blendtype, dim,      &
+                   order, newcurve, stat)
+
+!! PURPOSE
+!!   s1606 - Computes a blending curve between two curves. Two points
+!!           indicate between which ends the blend is to be produced. The
+!!           blending curve is either a circle or an approximated conic section
+!!           if this is possible, otherwise it is a quadratic polynomial spline
+!!           curve. The output is represented as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1606(curve1, curve2, epsge, point1, point2, blendtype, dim,   &
+!!                    order, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve1 
+!!     Type(SISLcurve), Intent(IN)    :: curve2 
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(IN)    :: point1(*) 
+!!     Real(REAL64),    Intent(IN)    :: point2(*) 
+!!     Integer,         Intent(IN)    :: blendtype 
+!!     Integer,         Intent(IN)    :: dim
+!!     Integer,         Intent(IN)    :: order 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1303 -------------------------------------
+
+  Subroutine s1303(startpt, epsge, angle, centrept, axis, dim, curve, stat)
+
+!! PURPOSE
+!!   s1303 - To create a curve approximating a circular arc around the axis
+!!           defined by the centre point, an axis vector, a start point and a
+!!           rotational angle. The maximal deviation between the true circular
+!!           arc and the approximation to the arc is controlled by the geometric
+!!           tolerance (epsge). The output will be represented as a B-spline
+!!           curve.
+
+!! INTERFACE
+!!   Subroutine s1303(startpt, epsge, angle, centrept, axis, dim, curve, stat)
+!!     Real(REAL64),    Intent(IN)    :: startpt(*)
+!!     Real(REAL64),    Intent(IN)    :: epsge
+!!     Real(REAL64),    Intent(IN)    :: angle 
+!!     Real(REAL64),    Intent(IN)    :: centrept(*)
+!!     Real(REAL64),    Intent(IN)    :: axis(*)
+!!     Integer,         Intent(IN)    :: dim
+!!     Type(SISLcurve), Intent(INOUT) :: curve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1611 -------------------------------------
+
+  Subroutine s1611(point, numpt, dim, typept, iopen, order, startpar, epsge,   &
+                   endpar, curve, stat) 
+
+!! PURPOSE
+!!  s1611 - approximate a conic arc with a curve in two or three dimen-
+!!          sional space. If two points are given, a straight line is produced,
+!!          if three an approximation of a circular arc, and if four or five a
+!!          conic arc. The output will be represented as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1611(point, numpt, dim, typept, iopen, order, startpar, epsge,&
+!!                   endpar, curve, stat) 
+!!     Real(REAL64),    Intent(IN)    :: point(*)
+!!     Integer,         Intent(IN)    :: numpt 
+!!     Integer,         Intent(IN)    :: dim
+!!     Real(REAL64),    Intent(IN)    :: typept(*)
+!!     Integer,         Intent(IN)    :: iopen 
+!!     Integer,         Intent(IN)    :: order 
+!!     Real(REAL64),    Intent(IN)    :: startpar 
+!!     Real(REAL64),    Intent(IN)    :: epsge
+!!     Real(REAL64),    Intent(INOUT) :: endpar 
+!!     Type(SISLcurve), Intent(INOUT) :: curve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1630 -------------------------------------
+
+  Subroutine s1630(epoint, inbpnt, astpar, iopen, idim, ik, rc, jstat) 
+
+!! PURPOSE
+!!   s1630 - To compute a curve using the input points as controlling vertices.
+!!           The distances between the points are used as parametrization.
+!!           The output will be represented as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1630(epoint, inbpnt, astpar, iopen, idim, ik, rc, jstat) 
+!!     Real(REAL64),    Intent(IN)    :: epoint(*)
+!!     Integer,         Intent(IN)    :: inbpnt 
+!!     Real(REAL64),    Intent(IN)    :: astpar 
+!!     Integer,         Intent(IN)    :: iopen 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ik
+!!     Type(SISLcurve), Intent(INOUT) :: rc 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1360 -------------------------------------
+
+  Subroutine s1360(oldcurve, offset, epsge, norm, max, dim, newcurve, stat)
+
+!! PURPOSE
+!!   s1360 - To create a approximation of the offset to a curve within a toler-
+!!           ance. The output will be represented as a B-spline curve.
+!!           With an offset of zero, this routine can be used to approximate any
+!!           any NURBS curve, within a tolerance, with a (non-rational) B-spline
+!!           curve.
+
+!! INTERFACE
+!!   Subroutine s1360(oldcurve, offset, epsge, norm, max, dim, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: oldcurve 
+!!     Real(REAL64),    Intent(IN)    :: offset 
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(IN)    :: norm(*) 
+!!     Real(REAL64),    Intent(IN)    :: max 
+!!     Integer,         Intent(IN)    :: dim 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1613 -------------------------------------
+
+  Subroutine s1613(curve, epsge, points, numpoints, stat)
+
+!! PURPOSE
+!!   1613 - To calculate a set of points on a curve. The straight lines between
+!!          the points will not deviate more than epsge from the curve at any
+!!          point. The generated points will have the same spatial dimension
+!!          as the input curve.
+
+!! INTERFACE
+!!   Subroutine s1613(curve, epsge, points, numpoints, stat)
+!!     Type(SISLcurve),              Intent(IN)    :: curve 
+!!     Real(REAL64),                 Intent(IN)    :: epsge
+!!     Real(REAL64),    ALLOCATABLE, Intent(INOUT) :: points(:)
+!!     Integer,                      Intent(INOUT) :: numpoints 
+!!     Integer,                      Intent(INOUT) :: stat
+
+!---------------------------------- s1600 -------------------------------------
+
+  Subroutine s1600(oldcurve, point, normal, dim, newcurve, stat)
+
+!! PURPOSE
+!!   s1600 - To mirror a curve around a plane.
+
+!! INTERFACE
+!!   Subroutine s1600(oldcurve, point, normal, dim, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: oldcurve 
+!!     Real(REAL64),    Intent(IN)    :: point(*)
+!!     Real(REAL64),    Intent(IN)    :: normal(*)
+!!     Integer,         Intent(IN)    :: dim 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1389 -------------------------------------
+
+  Subroutine s1389(curve, cubic, numcubic, dim, stat)
+
+!! PURPOSE
+!!   s1389 - Convert a curve of order up to 4 to a sequence of non-rational
+!!           cubic segments with uniform parameterization.
+
+!! INTERFACE
+!!   Subroutine s1389(curve, cubic, numcubic, dim, stat)
+!!     Type(SISLcurve),              Intent(IN)    :: curve 
+!!     Real(REAL64),    ALLOCATABLE, Intent(INOUT) :: cubic(:)
+!!     Integer,                      Intent(INOUT) :: numcubic
+!!     Integer,                      Intent(INOUT) :: dim 
+!!     Integer,                      Intent(INOUT) :: stat
+
+!---------------------------------- s1730 -------------------------------------
+
+  Subroutine s1730(curve, newcurve, stat)
+
+!! PURPOSE
+!!   s1730 - To convert a curve to a sequence of Bezier curves. The Bezier
+!!           curves are stored as one curve with all knots of multiplicity
+!!           newcurve%ik (order of the curve). If the input curve is rational,
+!!           the generated Bezier curves will be rational too (i.e. there will
+!!           be rational weights in the representation of the Bezier curves).
+
+!! INTERFACE
+!!   Subroutine s1730(curve, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1732 -------------------------------------
+
+  Subroutine s1732(curve, number, startpar, endpar, coef, stat)
+
+!! PURPOSE
+!!   s1732 - To pick out the next Bezier curve from a curve. This function re-
+!!           quires a curve represented as the curve that is output from s1730.
+!!           If the input curve is rational, the generated Bezier curves will be
+!!           rational too (i.e. there will be rational weights in the 
+!!           representation  of the Bezier curves).
+
+!! INTERFACE
+!!   Subroutine s1732(curve, number, startpar, endpar, coef, stat)
+!!     Type(SISLcurve),              Intent(IN)    :: curve 
+!!     Integer,                      Intent(IN)    :: number 
+!!     Real(REAL64),                 Intent(INOUT) :: startpar 
+!!     Real(REAL64),                 Intent(INOUT) :: endpar 
+!!     Real(REAL64),                 Intent(INOUT) :: coef(*)
+!!     Integer,                      Intent(INOUT) :: stat
+
+!---------------------------------- s1750 -------------------------------------
+
+  Subroutine s1750(curve, order, newcurve, stat)
+
+!! PURPOSE
+!!   s1720 - To express the “i”-th derivative of an open curve as a curve.
+
+!! INTERFACE
+!!   Subroutine s1750(curve, order, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve 
+!!     Integer,         Intent(IN)    :: order
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1720 -------------------------------------
+
+  Subroutine s1720(curve, derive, newcurve, stat)
+
+!! PURPOSE
+!!   s1720 - To express the “i”-th derivative of an open curve as a curve.
+
+!! INTERFACE
+!!  Subroutine s1720(curve, derive, newcurve, stat)
+!!    Type(SISLcurve), Intent(IN)    :: curve 
+!!    Integer,         Intent(IN)    :: derive 
+!!    Type(SISLcurve), Intent(INOUT) :: newcurve 
+!!    Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1522 -------------------------------------
+
+  Subroutine s1522(normal, centre, ellipaxis, ratio, dim, ellipse, stat)
+
+!! PURPOSE
+!!   s1522 - Convert a 2D or 3D analytical ellipse to a curve. The curve will
+!!           be geometrically exact.
+
+!! INTERFACE
+!!   Subroutine s1522(normal, centre, ellipaxis, ratio, dim, ellipse, stat)
+!!     Real(REAL64),    Intent(IN)    :: normal(*)
+!!     Real(REAL64),    Intent(IN)    :: centre(*)
+!!     Real(REAL64),    Intent(IN)    :: ellipaxis(*)
+!!     Real(REAL64),    Intent(IN)    :: ratio 
+!!     Integer,         Intent(IN)    :: dim 
+!!     Type(SISLcurve), Intent(INOUT) :: ellipse 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1011 -------------------------------------
+
+  Subroutine s1011(start_pos, top_pos, end_pos, shape, dim, arc_seg, stat)
+
+!! PURPOSE
+!!   s1011 - Convert an analytic conic arc to a curve. The curve will be geo-
+!!           metrically exact. The arc is given by position at start, shoulder
+!!           point and end, and a shape factor.
+
+!! INTERFACE
+!!   Subroutine s1011(start_pos, top_pos, end_pos, shape, dim, arc_seg, stat)
+!!     Real(REAL64),    Intent(IN)    :: start_pos(*)
+!!     Real(REAL64),    Intent(IN)    :: top_pos(*)
+!!     Real(REAL64),    Intent(IN)    :: end_pos(*)
+!!     Real(REAL64),    Intent(IN)    :: shape 
+!!     Integer,         Intent(IN)    :: dim 
+!!     Type(SISLcurve), Intent(INOUT) :: arc_seg 
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1012 -------------------------------------
+
+  Subroutine s1012(start_pos, axis_pos, axis_dir, frequency, numb_quad,        &
+                   counter_clock, helix, stat)
+
+!! PURPOSE
+!!   s1012 - Convert an analytical truncated helix to a curve. The curve will
+!!           be geometrically exact.
+
+!! INTERFACE
+!!   Subroutine s1012(start_pos, axis_pos, axis_dir, frequency, numb_quad,     &
+!!                    counter_clock, helix, stat)
+!!     Real(REAL64),    Intent(IN)    :: start_pos(*)
+!!     Real(REAL64),    Intent(IN)    :: axis_pos(*)
+!!     Real(REAL64),    Intent(IN)    :: axis_dir(*)
+!!     Real(REAL64),    Intent(IN)    :: frequency 
+!!     Integer,         Intent(IN)    :: numb_quad 
+!!     Integer,         Intent(IN)    :: counter_clock 
+!!     Type(SISLcurve), Intent(INOUT) :: helix 
+!!     Integer,         Intent(INOUT) :: stat
+
+
+3.0 Curve Interrogation
+
+!---------------------------------- s1871 -------------------------------------
+
+  Subroutine s1871(pc1, pt1, idim, aepsge, jpt, gpar1, jcrv, wcurve, jstat)
+
+!! PURPOSE
+!!   s1871 - Find all the intersections between a curve and a point.
+
+!! INTERFACE
+!!   Subroutine s1871(pc1, pt1, idim, aepsge, jpt, gpar1, jcrv, wcurve, jstat)
+!!     Type(SISLcurve),                 Intent(IN)    :: pc1
+!!     Real(REAL64),                    Intent(IN)    :: pt1(*)
+!!     Integer,                         Intent(IN)    :: idim
+!!     Real(REAL64),                    Intent(IN)    :: aepsge 
+!!     Integer,                         Intent(INOUT) :: jpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gpar1(:)
+!!     Integer,                         Intent(INOUT) :: jcrv 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: wcurve(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+
+!---------------------------------- s1850 -------------------------------------
+
+  Subroutine s1850(curve, point, normal, dim, epsco, epsge, numintpt,          &
+                   intpar, numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1850 - Find all the intersections between a curve and a plane (if curve
+!!           dimension and dim = 3) or a curve and a line (if curve dimension
+!!           and dim = 2).
+
+!! INTERFACE
+!!   Subroutine s1850(curve, point, normal, dim, epsco, epsge, numintpt,       &
+!!                    intpar, numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Real(REAL64),                    Intent(IN)    :: normal(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco 
+!!     Real(REAL64),                    Intent(IN)    :: epsge 
+!!     Integer,                         Intent(INOUT) :: numintpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1327 -------------------------------------
+
+  Subroutine s1327(pcold, epoint, enorm1, enorm2, idim, rcnew, jstat)
+
+!! PURPOSE
+!!   1327 - Put the equation of the curve pointed at by pcold into two planes
+!!          given by the point epoint and the normals enorm1 and enorm2.
+!1          The result is an equation where the new two-dimensional curve
+!!          rcnew is to be equal to origo.
+
+!! INTERFACE
+!!   Subroutine s1327(pcold, epoint, enorm1, enorm2, idim, rcnew, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pcold 
+!!     Real(REAL64),    Intent(IN)    :: epoint(*)
+!!     Real(REAL64),    Intent(IN)    :: enorm1(*)
+!!     Real(REAL64),    Intent(IN)    :: enorm2(*)
+!!     Integer,         Intent(IN)    :: idim
+!!     Type(SISLcurve), Intent(INOUT) :: rcnew 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1371 -------------------------------------
+
+  Subroutine s1371(curve, centre, radius, dim, epsco, epsge, numintpt, intpar, &
+                   numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1371 - Find all the intersections between a curve and a sphere (if curve
+!!           dimension and dim = 3), or a curve and a circle (if curve dimension
+!!           and dim = 2).
+
+!! INTERFACE
+!!   Subroutine s1371(curve, centre, radius, dim, epsco, epsge, numintpt,      &
+!!                    intpar, numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: centre(*)
+!!     Real(REAL64),                    Intent(IN)    :: radius 
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco 
+!!     Real(REAL64),                    Intent(IN)    :: epsge 
+!!     Integer,                         Intent(INOUT) :: numintpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1374 -------------------------------------
+
+  Subroutine s1374(curve, conarray, dim, epsco, epsge, numintpt, intpar,      &
+                   numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1374 - Find all the intersections between a curve and a quadric curve, (if
+!!           curve dimension and dim = 2), or a curve and a quadric surface,
+!!           (if curve dimension and dim = 3).
+
+!! INTERFACE
+!!   Subroutine s1374(curve, conarray, dim, epsco, epsge, numintpt, intpar,    &
+!!                    numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: conarray(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco 
+!!     Real(REAL64),                    Intent(IN)    :: epsge 
+!!     Integer,                         Intent(INOUT) :: numintpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1857 -------------------------------------
+
+  Subroutine s1857(curve1, curve2, epsco, epsge, numintpt, intpar1, intpar2,   &
+                   numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1857 - Find all the intersections between two curves.
+
+!! INTERFACE
+!!   Subroutine s1857(curve1, curve2, epsco, epsge, numintpt, intpar1, intpar2,   &
+!!                    numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve1
+!!     Type(SISLcurve),                 Intent(IN)    :: curve2
+!!     Real(REAL64),                    Intent(IN)    :: epsco 
+!!     Real(REAL64),                    Intent(IN)    :: epsge 
+!!     Integer,                         Intent(INOUT) :: numintpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar1(:)
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar2(:)
+!!     Integer,                         Intent(INOUT) :: numintcu 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1240 -------------------------------------
+
+  Subroutine s1240(curve, epsge, length, stat)
+
+!! PURPOSE
+!!   s1240 - Compute the length of a curve. The length calculated will not
+!!           deviate more than epsge divided by the calculated length, from
+!!           the real length of the curve.
+
+!! INTERFACE
+!!   Subroutine s1240(curve, epsge, length, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(INOUT) :: length 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1364 -------------------------------------
+
+  Subroutine s1364(curve, epsge, stat)
+
+!! PURPOSE
+!!   s1364 - To check if a curve is closed, i.e. test if the distance between
+!!           the end points of the curve is less than a given tolerance.
+
+!! INTERFACE
+!!   Subroutine s1364(curve, epsge, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1451 -------------------------------------
+
+  Subroutine s1451(pc1, aepsge, jdgen, jstat)
+
+!! PURPOSE
+!!   s1451 - To check if a curve is degenerated.
+
+!! INTERFACE
+!!   Subroutine s1451(pc1, aepsge, jdgen, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pc1 
+!!     Real(REAL64),    Intent(IN)    :: aepsge 
+!!     Integer,         Intent(INOUT) :: jdgen 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1363 -------------------------------------
+
+  Subroutine s1363(curve, startpar, endpar, stat)
+
+!! PURPOSE
+!!   s1363 - To pick the parameter range of a curve.
+
+!! INTERFACE
+!!   Subroutine s1363(curve, startpar, endpar, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(INOUT) :: startpar 
+!!     Real(REAL64),    Intent(INOUT) :: endpar 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1953 -------------------------------------
+
+  Subroutine s1953(curve, point, dim, epsco, epsge, numintpt, intpar,         &
+                   numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1953 - Find the closest points between a curve and a point.
+
+!! INTERFACE
+!!   Subroutine s1953(curve, point, dim, epsco, epsge, numintpt, intpar,       &
+!!                    numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco 
+!!     Real(REAL64),                    Intent(IN)    :: epsge 
+!!     Integer,                         Intent(INOUT) :: numintpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1957 -------------------------------------
+
+  Subroutine s1957(pcurve, epoint, idim, aepsco, aepsge, gpar, dist, jstat)
+
+!! PURPOSE
+!!   s1957 - Find the closest point between a curve and a point. The method is
+!!           fast and should work well in clear cut cases but does not guarantee
+!!           finding the right solution. As long as it doesn’t fail, it will
+!!           find exactly one point. In other cases, use s1953().
+
+!! INTERFACE
+!!   Subroutine s1957(pcurve, epoint, idim, aepsco, aepsge, gpar, dist, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pcurve
+!!     Real(REAL64),    Intent(IN)    :: epoint(*)
+!!     Integer,         Intent(IN)    :: idim 
+!!     Real(REAL64),    Intent(IN)    :: aepsco 
+!!     Real(REAL64),    Intent(IN)    :: aepsge
+!!     Real(REAL64),    Intent(INOUT) :: gpar
+!!     Real(REAL64),    Intent(INOUT) :: dist 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1774 -------------------------------------
+
+  Subroutine s1774(crv, point, dim, epsge, start, end, guess, clpar, stat)
+
+!! PURPOSE
+!!   s1774 - Newton iteration on the distance function between a curve and a
+!!           point, to find a closest point or an intersection point. If a bad
+!!           choice for the guess parameter is given in, the iteration may end
+!!           at a local, not global closest point.
+
+!! INTERFACE
+!!   Subroutine s1774(crv, point, dim, epsge, start, end, guess, clpar, stat)
+!!     Type(SISLcurve), Intent(IN)    :: crv
+!!     Real(REAL64),    Intent(IN)    :: point(*)
+!!     Integer,         Intent(IN)    :: dim 
+!!     Real(REAL64),    Intent(IN)    :: epsge
+!!     Real(REAL64),    Intent(IN)    :: start 
+!!     Real(REAL64),    Intent(IN)    :: end 
+!!     Real(REAL64),    Intent(IN)    :: guess 
+!!     Real(REAL64),    Intent(INOUT) :: clpar
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1955 -------------------------------------
+
+  Subroutine s1955(curve1, curve2, epsco, epsge, numintpt, intpar1, intpar2,   &
+                   numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1955 - Find the closest points between two curves.
+
+!! INTERFACE
+!!   Subroutine s1955(curve1, curve2, epsco, epsge, numintpt, intpar1,         &
+!!                    intpar2, numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve1
+!!     Type(SISLcurve),                 Intent(IN)    :: curve2
+!!     Real(REAL64),                    Intent(IN)    :: epsco 
+!!     Real(REAL64),                    Intent(IN)    :: epsge 
+!!     Integer,                         Intent(INOUT) :: numintpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar1(:)
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar2(:)
+!!     Integer,                         Intent(INOUT) :: numintcu 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1013 -------------------------------------
+
+  Subroutine s1013(pcurve, ang, ang_tol, guess_par, iter_par, jstat)
+
+!! PURPOSE
+!!   s1013 - Find a point on a 2D curve along a given direction.
+
+!! INTERFACE
+!!   Subroutine s1013(pcurve, ang, ang_tol, guess_par, iter_par, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pcurve
+!!     Real(REAL64),    Intent(IN)    :: ang 
+!!     Real(REAL64),    Intent(IN)    :: ang_tol 
+!!     Real(REAL64),    Intent(IN)    :: guess_par 
+!!     Real(REAL64),    Intent(INOUT) :: iter_par 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1920 -------------------------------------
+
+  Subroutine s1920(curve, dir, dim, epsco, epsge, numintpt, intpar,         &
+                   numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1920 - Find the absolute extremal points/intervals of a curve relative to
+!!           a given direction.
+
+!! INTERFACE
+!!   Subroutine s1920(curve, dir, dim, epsco, epsge, numintpt, intpar,        &
+!!                    numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: dir(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco 
+!!     Real(REAL64),                    Intent(IN)    :: epsge 
+!!     Integer,                         Intent(INOUT) :: numintpt 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu 
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1241 -------------------------------------
+
+  Subroutine s1241(pcurve, point, dim, epsge, area, stat)
+
+!! PURPOSE
+!!   s1241 - To calculate the area between a 2D curve and a 2D point. When
+!!           the curve is rotating counter-clockwise around the point, the area
+!!           contribution is positive. When the curve is rotating clockwise
+!!           around the point, the area contribution is negative. If the curve
+!!           is closed or periodic, the area calculated is independent of where
+!!           the point is situated. The area is calculated exactly for B-spline
+!!           curves, for NURBS the result is an approximation. This routine
+!!           will only perform if the order of the curve is less than 7 (can
+!!           easily be extended).
+
+!! INTERFACE
+!!   Subroutine s1241(pcurve, point, dim, epsge, area, stat)
+!!     Type(SISLcurve), Intent(IN)    :: pcurve
+!!     Real(REAL64),    Intent(IN)    :: point(*) 
+!!     Integer,         Intent(IN)    :: dim 
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(INOUT) :: area 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1243 -------------------------------------
+
+  Subroutine s1243(pcurve, point, dim, epsge, weight, area, moment, stat)
+
+!! PURPOSE
+!!   s1243 - To calculate the weight point and rotational momentum of an area
+!!           between a 2D curve and a 2D point. The area is also calculated.
+!!           When the curve is rotating counter-clockwise around the point, the
+!!           area contribution is positive. When the curve is rotating clockwise
+!!           around the point, the area contribution is negative. OBSERVE:
+!!           FOR CALCULATION OF AREA ONLY, USE s1241().
+
+!! INTERFACE
+!!   Subroutine s1243(pcurve, point, dim, epsge, weight, area, moment, stat)
+!!     Type(SISLcurve), Intent(IN)    :: pcurve
+!!     Real(REAL64),    Intent(IN)    :: point(*) 
+!!     Integer,         Intent(IN)    :: dim 
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(INOUT) :: weight(*) 
+!!     Real(REAL64),    Intent(INOUT) :: area 
+!!     Real(REAL64),    Intent(INOUT) :: moment 
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- newbox ------------------------------------
+
+  Subroutine newbox(idim, box)
+
+!! PURPOSE
+!!   Create and initialize a curve/surface bounding box instance 
+
+!! INTERFACE
+!!   Subroutine newbox(idim, box)
+!!     Integer,       Intent(INOUT) :: idim 
+!!     Type(SISLbox), Intent(INOUT) :: box
+
+!---------------------------------- s1988 -------------------------------------
+
+  Subroutine s1988(pc, emax, emin, jstat)
+
+!! PURPOSE
+!!   s1988 - Find the bounding box of a SISLCurve. NB. The geometric
+!!           bounding box is returned also in the rational case, that is the
+!!           box in homogenous coordinates is NOT computed
+
+!! INTERFACE
+!!   Subroutine s1988(pc, emax, emin, jstat)
+!!     Type(SISLcurve),                 Intent(IN)    :: pc 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: emax(:)
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: emin(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+
+!---------------------------------- newdir ------------------------------------
+
+  Subroutine newdir(idim, dir)
+
+!! PURPOSE
+!!   newdir - Create and initialize a curve/surface direction instance
+
+!! INTERFACE
+!!   Subroutine newdir(idim, dir)
+!!     Integer,       Intent(IN)    :: idim
+!!     Type(SISLdir), Intent(INOUT) :: dir
+
+!---------------------------------- s1986 -------------------------------------
+
+  Subroutine s1986(pc, aepsge, jgtpi, gaxis, cang, jstat)
+
+!! PURPOSE
+!!   s1986 - Find the direction cone of a curve.
+
+!! INTERFACE
+!!   Subroutine s1986(pc, aepsge, jgtpi, gaxis, cang, jstat)
+!!     Type(SISLcurve),                 Intent(IN)    :: pc 
+!!     Real(REAL64),                    Intent(IN)    :: aepsge
+!!     Integer,                         Intent(INOUT) :: jgtpi
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gaxis(:)
+!!     Real(REAL64),                    Intent(INOUT) :: cang 
+!!     Integer,                         Intent(INOUT) :: jstat
+
+4.0 Curve Analysis
+
+
+!---------------------------------- s2550 -------------------------------------
+
+  Subroutine s2550(curve, ax, num_ax, curvature, jstat)
+
+!! PURPOSE
+!!   s2550 - Evaluate the curvature of a curve at given parameter values ax( 1
+!!           ),...,ax(num_ax ).
+
+!! INTERFACE
+!!   Subroutine s2550(curve, ax, num_ax, curvature, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: ax(*)
+!!     Integer,         Intent(IN)    :: num_ax 
+!!     Real(REAL64),    Intent(INOUT) :: curvature(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2553 -------------------------------------
+
+  Subroutine s2553(curve, ax, num_ax, torsion, jstat)
+
+!! PURPOSE
+!!   s2553 - Evaluate the torsion of a curve at given parameter values ax( 1
+!!           ),...,ax( num_ax ).
+
+!! INTERFACE
+!!   Subroutine s2553(curve, ax, num_ax, torsion, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: ax(*)
+!!     Integer,         Intent(IN)    :: num_ax 
+!!     Real(REAL64),    Intent(INOUT) :: torsion(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s2556 -------------------------------------
+
+  Subroutine s2556(curve, ax, num_ax, VoC, jstat)
+
+!! PURPOSE
+!!   s2556 - Evaluate the Variation of Curvature (VoC) of a curve at given
+!!           parameter values ax( 1 ),...,ax( num_ax ).
+
+!! INTERFACE
+!!   Subroutine s2556(curve, ax, num_ax, VoC, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: ax(*)
+!!     Integer,         Intent(IN)    :: num_ax 
+!!     Real(REAL64),    Intent(INOUT) :: VoC(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s2559 -------------------------------------
+
+  Subroutine s2559(curve, ax, num_ax, p, t, n, b, jstat)
+
+!! PURPOSE
+!!   s2559 - Evaluate the Frenet Frame (t,n,b) of a curve at given parameter
+!!           values ax( 1 ),...,ax( num_ax).
+
+!! INTERFACE
+!!   Subroutine s2559(curve, ax, num_ax, p, t, n, b, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: ax(*)
+!!     Integer,         Intent(IN)    :: num_ax 
+!!     Real(REAL64),    Intent(INOUT) :: p(*)
+!!     Real(REAL64),    Intent(INOUT) :: t(*)
+!!     Real(REAL64),    Intent(INOUT) :: n(*)
+!!     Real(REAL64),    Intent(INOUT) :: b(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2562 -------------------------------------
+
+  Subroutine s2562(curve, ax, num_ax, val_flag, p, t, n, b, val, jstat)
+
+!! PURPOSE
+!!   s2562 - Evaluate the 3D position, the Frenet Frame (t,n,b) and geometric
+!!           property (curvature, torsion or variation of curvature) of a curve
+!!           at given parameter values ax(1),...,ax(num_ ax). These data are
+!!           needed to produce spike plots (using the Frenet Frame and the
+!!           geometric property) and circular tube plots (using circular in the
+!!           normal plane (t,b), where the radius is equal to the geometric
+!!           property times a scaling factor for visual effects).
+
+!! INTERFACE
+!!   Subroutine s2562(curve, ax, num_ax, val_flag, p, t, n, b, val, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: ax(*)
+!!     Integer,         Intent(IN)    :: num_ax 
+!!     Integer,         Intent(IN)    :: val_flag 
+!!     Real(REAL64),    Intent(INOUT) :: p(*)
+!!     Real(REAL64),    Intent(INOUT) :: t(*)
+!!     Real(REAL64),    Intent(INOUT) :: n(*)
+!!     Real(REAL64),    Intent(INOUT) :: b(*)
+!!     Real(REAL64),    Intent(INOUT) :: val(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+5.0 Curve Utilities
+
+!-------------------------------- newCurve ------------------------------------
+
+  Subroutine newCurve(number, order, knots, coef, ikind, idim, copy, curve)
+
+!! PURPOSE
+!!   newCurve - Create and intialize a SISLCurve-instance
+
+!! INTERFACE
+!!   Subroutine newCurve(number, order, knots, coef, ikind, idim, copy, curve)
+!!     Integer,                 Intent(IN)    :: number
+!!     Integer,                 Intent(IN)    :: order
+!!     Real(REAL64),            Intent(IN)    :: knots(*)
+!!     Real(REAL64),            Intent(IN)    :: coef(*)
+!!     Integer,                 Intent(IN)    :: ikind
+!!     Integer,                 Intent(IN)    :: idim
+!!     Integer,                 Intent(IN)    :: copy
+!!    Type(SISLcurve), TARGET, Intent(INOUT) :: curve
+
+
+!-------------------------------- copyCurve -----------------------------------
+
+  Subroutine copyCurve(old_curve, new_curve)
+
+!! PURPOSE
+!!   Make a copy of a curve
+
+!! INTERFACE
+!!   Subroutine copyCurve(old_curve, new_curve)
+!!     Type(SISLCurve), TARGET, Intent(IN)    :: new_curve
+!!     Type(SISLCurve), TARGET, Intent(INOUT) :: new_curve
+
+!-------------------------------- freeCurve -----------------------------------
+
+  Subroutine freeCurve(curve, free_cptr)
+
+!! PURPOSE
+!!   freeCurve - Free the space occupied by the curve. Before using freeCurve,
+!!               make sure the curve object exists.
+
+!! INTERFACE
+!!   Subroutine freeCurve(curve, free_cptr)
+!!     Type(SISLcurve), TARGET,   Intent(INOUT) :: curve
+!!     Logical,         OPTIONAL, Intent(IN)    :: free_cptr
+
+!---------------------------------- s1227 -------------------------------------
+
+  Subroutine s1227(curve, der, parvalue, leftknot, deriv, stat)
+
+!! PURPOSE
+!!   s1227 - To compute the position and the first derivatives of the curve at
+!!           a given parameter value. Evaluation from the left hand side.
+
+!! INTERFACE
+!!   Subroutine s1227(curve, der, parvalue, leftknot, deriv, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Integer,         Intent(IN)    :: der
+!!     Real(REAL64),    Intent(IN)    :: parvalue
+!!     Integer,         Intent(INOUT) :: leftknot
+!!     Real(REAL64),    Intent(INOUT) :: deriv(*)
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1221 -------------------------------------
+
+  Subroutine s1221(curve, der, parvalue, leftknot, deriv, stat)
+
+!! PURPOSE
+!!   s1221 - To compute the positione and the first derivatives of a curve at a
+!!           given parameter value. Evaluation from the right hand side.
+
+!! INTERFACE
+!!   Subroutine s1221(curve, der, parvalue, leftknot, deriv, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Integer,         Intent(IN)    :: der
+!!     Real(REAL64),    Intent(IN)    :: parvalue
+!!     Integer,         Intent(INOUT) :: leftknot
+!!     Real(REAL64),    Intent(INOUT) :: deriv(*)
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1225 -------------------------------------
+
+  Subroutine s1225(curve, der, parvalue, leftknot, deriv, curvature,           &
+                   radius_of_curvature, jstat)
+
+!! PURPOSE
+!!   s1225 - Evaluate position, first derivative, curvature and radius of curva-
+!!           ture of a curve at a given parameter value, from the left hand
+!!           side.
+
+!! INTERFACE
+!!   Subroutine s1225(curve, der, parvalue, leftknot, deriv, curvature,        &
+!!                    radius_of_curvature, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Integer,         Intent(IN)    :: der
+!!     Real(REAL64),    Intent(IN)    :: parvalue
+!!     Integer,         Intent(INOUT) :: leftknot
+!!     Real(REAL64),    Intent(INOUT) :: deriv(*)
+!!     Real(REAL64),    Intent(INOUT) :: curvature(*)
+!!     Real(REAL64),    Intent(INOUT) :: radius_of_curvature
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1226 -------------------------------------
+
+  Subroutine s1226(curve, der, parvalue, leftknot, deriv, curvature,           &
+                   radius_of_curvature, jstat)
+
+!! PURPOSE
+!!   s1226 - Evaluate position, first derivative, curvature and radius of curva-
+!!           ture of a curve at a given parameter value, from the right hand
+!!           side.
+
+!! INTERFACE
+!!   Subroutine s1226(curve, der, parvalue, leftknot, deriv, curvature,        &
+!!                    radius_of_curvature, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Integer,         Intent(IN)    :: der
+!!     Real(REAL64),    Intent(IN)    :: parvalue
+!!     Integer,         Intent(INOUT) :: leftknot
+!!     Real(REAL64),    Intent(INOUT) :: deriv(*)
+!!     Real(REAL64),    Intent(INOUT) :: curvature(*)
+!!     Real(REAL64),    Intent(INOUT) :: radius_of_curvature
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1542 -------------------------------------
+
+  Subroutine s1542(pc1, m, x, eder, jstat)
+
+!! PURPOSE
+!!   s1542 - Evaluate the curve defined by pc1 over a m grid of points
+!!           (x(i)). Only positions are evaluated. This does not work for in the
+!!                   rational case.
+
+!! INTERFACE
+!!   Subroutine s1542(pc1, m, x, eder, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pc1 
+!!     Integer,         Intent(IN)    :: m 
+!!     Real(REAL64),    Intent(INOUT) :: x(*)
+!!     Real(REAL64),    Intent(INOUT) :: eder(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1710 -------------------------------------
+
+  Subroutine s1710(pc1, apar, rcnew1, rcnew2, jstat)
+
+!! PURPOSE
+!!   s1710 - Subdivide a curve at a given parameter value.
+!!           NOTE: When the curve is periodic (i.e. when the cuopen flag of
+!!           the curve has value = −1), this function will return only ONE
+!!           curve through rcnew1. This curve is the same geometric curve as
+!!           pc1, but is represented on a closed basis, i.e. with k-tuple start/end
+!!           the knots and coinciding start/end coefficients. The cuopen flag of
+!!           curve will then be set to closed (= 0) and a status value jstat 
+!!           equal to 2 will be returned.
+
+!! INTERFACE
+!!   Subroutine s1710(pc1, apar, rcnew1, rcnew2, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pc1
+!!     Real(REAL64),    Intent(IN)    :: apar
+!!     Type(SISLcurve), Intent(INOUT) :: rcnew1
+!!     Type(SISLcurve), Intent(INOUT) :: rcnew2
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1017 -------------------------------------
+
+  Subroutine s1017(pc, rc, apar, jstat)
+
+!!PURPOSE
+!!  s1017 - Insert a given knot into the description of a curve.
+!!          NOTE : When the curve is periodic (i.e. the curve flag cuopen =
+!!          −1), the input parameter value must lie in the half-open [et(kk −
+!!         1), el(kn) interval, the function will automatically update the extra
+!!          knots and coeffisients. rcnew->in is still equal to pc->in + 1!
+
+!! INTERFACE
+!!   Subroutine s1017(pc, rc, apar, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pc
+!!     Type(SISLcurve), Intent(INOUT) :: rc
+!!     Real(REAL64),    Intent(IN)    :: apar
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1018 -------------------------------------
+
+  Subroutine s1018(pc, epar, inpar, rcnew, jstat)
+
+!! PURPOSE
+!!   s1018 - Insert a given set of knots into the description of a curve.
+!!           NOTE : When the curve is periodic (i.e. when the curve flag
+!!           cuopen = −1), the input parameter values must lie in the half-
+!!           open (et(kk), et(kn+1), the function will automatically update
+!!           the extra knots and coeffisients. The rcnew%in will still be equal
+!!           to pc%in + inpar.
+
+!! INTERFACE
+!!   Subroutine s1018(pc, epar, inpar, rcnew, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pc
+!!     Real(REAL64),    Intent(IN)    :: epar(*)
+!!     Integer,         Intent(IN)    :: inpar
+!!     Type(SISLcurve), Intent(INOUT) :: rcnew
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1714 -------------------------------------
+
+  Subroutine s1714(curve, parval1, parval2, newcurve1, newcurve2, stat)
+
+!! PURPOSE
+!!   s1714 - Split a curve in two parts at two specified parameter values. The
+!!           first curve starts at parval1. If the curve is open, the last part
+!!           of the curve is translated so that the end of the curve joins the
+!!           start.
+
+!! INTERFACE
+!!   Subroutine s1712(curve, parval1, parval2, newcurve1, newcurve2, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: parval1 
+!!     Real(REAL64),    Intent(IN)    :: parval2 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve1
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve2
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1712 -------------------------------------
+
+  Subroutine s1712(curve, begpar, endpar, newcurve, stat)
+
+!! PURPOSE
+!!   s1712 - To pick one part of a curve and make a new curve of the part. If
+!!           endpar < begpar the direction of the new curve is turned. Use
+!!           s1713() to pick a curve part crossing the start/end points of a
+!!           closed (or periodic) curve.
+
+!! INTERFACE
+!!   Subroutine s1712(curve, begpar, endpar, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: begpar
+!!     Real(REAL64),    Intent(IN)    :: endpar
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1713 -------------------------------------
+
+  Subroutine s1713(curve, begpar, endpar, newcurve, stat)
+
+!! PURPOSE
+!!   s1713 - To pick one part of a closed curve and make a new curve of that
+!!           part. If the routine is used on an open curve and endpar ≤ begpar,
+!!           the last part of the curve is translated so that the end of the
+!!           curve joins the start.
+
+!! INTERFACE
+!!   Subroutine s1713(curve, begpar, endpar, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve 
+!!     Real(REAL64),    Intent(IN)    :: begpar
+!!     Real(REAL64),    Intent(IN)    :: endpar
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1715 -------------------------------------
+
+  Subroutine s1715(curve1, curve2, end1, end2, newcurve, stat)
+
+!! PURPOSE
+!!   s1715 - To join one end of one curve with one end of another curve by
+!!           translating the second curve. If curve1 is to be joined at the
+!!           start, the direction of the curve is turned. If curve2 is to be 
+!!           joined at the end, the direction of this curve is turned. This
+!!           means that curve1 always makes the first part of the new curve.
+
+!! INTERFACE
+!!   Subroutine s1715(curve1, curve2, end1, end2, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve1 
+!!     Type(SISLcurve), Intent(IN)    :: curve2 
+!!     Integer,         Intent(IN)    :: end1 
+!!     Integer,         Intent(IN)    :: end2 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1716 -------------------------------------
+
+  Subroutine s1716(curve1, curve2, espge, newcurve, stat)
+
+!! PURPOSE
+!!   s1716 - To join two curves at the ends that lie closest to each other, if
+!!           the distance between the ends is less than the tolerance epsge. If
+!!           curve1 is to be joined at the start, the direction of the curve is
+!!           turned. If curve2 is to be joined at the end, the direction of this
+!!           curve is turned. This means that curve1 always makes up the first
+!!           part of the new curve. If epsge is positive, but smaller than the
+!!           smallest distance between the ends of the two curves, a NULL
+!!           pointer is returned.
+
+!! INTERFACE
+!!   Subroutine s1716(curve1, curve2, espge, newcurve, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve1 
+!!     Type(SISLcurve), Intent(IN)    :: curve2 
+!!     Real(REAL64),    Intent(IN)    :: espge 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1706 -------------------------------------
+
+  Subroutine s1706(curve)
+
+!! PURPOSE
+!!   s1706 - Turn the direction of a curve by reversing the ordering of the
+!!           coefficients. The start parameter value of the new curve is the
+!!           same as the start parameter value of the old curve. This routine
+!!           turns the direction of the orginal curve. If you want a copy with
+!!           a turned direction, just make a copy and turn the direction of the
+!!           copy.
+
+!! INTERFACE
+!!   Subroutine s1706(curve)
+!!     Type(SISLcurve), Intent(INOUT) :: curve 
+
+!---------------------------------- s1233 -------------------------------------
+
+  Subroutine s1233(pc, afak1, afak2, rc, jstat)
+
+!! PURPOSE
+!!   s1233 - To extend a B-spline curve (i.e. NOT rationals) at the start and/or
+!!           the end of the curve by continuing the polynomial behaviour of
+!!           the curve.
+
+!! INTERFACE
+!!   Subroutine s1233(pc, afak1, afak2, rc, jstat)
+!!     Type(SISLCurve), Intent(IN)    :: pc 
+!!     Real(REAL64),    Intent(IN)    :: afak1
+!!     Real(REAL64),    Intent(IN)    :: afak2
+!!     Type(SISLCurve), Intent(INOUT) :: rc
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+6.0 Surface Definition
+
+
+!---------------------------------- s1536 -------------------------------------
+
+  Subroutine s1536(points, im1, im2, idim, ipar, con1, con2, con3, con4,       &
+                   iorder1, iorder2, iopen1, iopen2, rsurf, jstat)
+
+!! PURPOSE
+!!   s1536 - To compute a tensor surface interpolating a set of points, auto-
+!!           matic parameterization. The output is represented as a B-spline
+!!           surface.
+
+!! INTERFACE
+!!   Subroutine s1536(points, im1, im2, idim, ipar, con1, con2, con3, con4,    &
+!!                    iorder1, iorder2, iopen1, iopen2, rsurf, jstat)
+!!     Real(REAL64),    Intent(IN)    :: points(*) 
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Integer,         Intent(IN)    :: con1 
+!!     Integer,         Intent(IN)    :: con2 
+!!     Integer,         Intent(IN)    :: con3 
+!!     Integer,         Intent(IN)    :: con4 
+!!     Integer,         Intent(IN)    :: iorder1 
+!!     Integer,         Intent(IN)    :: iorder2 
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsurf
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1537 -------------------------------------
+
+  Subroutine s1537(points, im1, im2, idim, par1, par2, con1, con2, con3, con4, &
+                   iorder1, iorder2, iopen1, iopen2, rsurf, jstat)
+
+!! PURPOSE
+!!   s1537 - Compute a tensor surface interpolating a set of points, parameter-
+!!           ization as input. The output is represented as a B-spline surface.
+
+!! INTERFACE
+!!   Subroutine s1537(points, im1, im2, idim, par1, par2, con1, con2, con3,  &
+!!                    con4, iorder1, iorder2, iopen1, iopen2, rsurf, jstat)
+!!     Real(REAL64),    Intent(IN)    :: points(*) 
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim
+!!     Real(REAL64),    Intent(IN)    :: par1(*) 
+!!     Real(REAL64),    Intent(IN)    :: par2(*) 
+!!     Integer,         Intent(IN)    :: con1 
+!!     Integer,         Intent(IN)    :: con2 
+!!     Integer,         Intent(IN)    :: con3 
+!!     Integer,         Intent(IN)    :: con4 
+!!     Integer,         Intent(IN)    :: iorder1 
+!!     Integer,         Intent(IN)    :: iorder2 
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsurf
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1534 -------------------------------------
+
+  Subroutine s1534(points, der10, der01, der11, im1, im2, idim, ipar, con1,    &
+                   con2, con3, con4, iorder1, iorder2, iopen1, iopen2, rsurf,  &
+                   jstat)
+
+!! PURPOSE
+!!    s1534 - To compute a surface interpolating a set of points, derivatives as
+!!            input. The output is represented as a B-spline surface.
+
+!! INTERFACE
+!!   Subroutine s1534(points, der10, der01, der11, im1, im2, idim, ipar, con1, &
+!!                    con2, con3, con4, iorder1, iorder2, iopen1, iopen2,      &
+!!                    rsurf, jstat)
+!!     Real(REAL64),    Intent(IN)    :: points(*)
+!!     Real(REAL64),    Intent(IN)    :: der10(*) 
+!!     Real(REAL64),    Intent(IN)    :: der01(*) 
+!!     Real(REAL64),    Intent(IN)    :: der11(*) 
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Integer,         Intent(IN)    :: con1 
+!!     Integer,         Intent(IN)    :: con2 
+!!     Integer,         Intent(IN)    :: con3 
+!!     Integer,         Intent(IN)    :: con4 
+!!     Integer,         Intent(IN)    :: iorder1 
+!!     Integer,         Intent(IN)    :: iorder2 
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsurf
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1535 -------------------------------------
+
+  Subroutine s1535(points, der10, der01, der11, im1, im2, idim, par1, par2,    &
+                   con1, con2, con3, con4, iorder1, iorder2, rsurf, jstat) 
+
+!! PURPOSE
+!!   s1535 - Compute a surface interpolating a set of points, derivatives and
+!!           parameterization as input. The output is represented as a B-spline
+!!           surface.
+
+!! INTERFACE
+!!   Subroutine s1535(points, der10, der01, der11, im1, im2, idim, par1, par2, &
+!!                    con1, con2, con3, con4, iorder1, iorder2, rsurf, jstat) 
+!!     Real(REAL64),    Intent(IN)    :: points(*)
+!!     Real(REAL64),    Intent(IN)    :: der10(*) 
+!!     Real(REAL64),    Intent(IN)    :: der01(*) 
+!!     Real(REAL64),    Intent(IN)    :: der11(*) 
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Real(REAL64),    Intent(IN)    :: par1(*)
+!!     Real(REAL64),    Intent(IN)    :: par2(*)
+!!     Integer,         Intent(IN)    :: con1 
+!!     Integer,         Intent(IN)    :: con2 
+!!     Integer,         Intent(IN)    :: con3 
+!!     Integer,         Intent(IN)    :: con4 
+!!     Integer,         Intent(IN)    :: iorder1 
+!!     Integer,         Intent(IN)    :: iorder2 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsurf
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1529 -------------------------------------
+
+  Subroutine s1529(ep, eder10, eder01, eder11, im1, im2, idim, ipar, rsurf,    &
+                   jstat) 
+
+!! PURPOSE
+!!   s1529 - Compute the cubic Hermite surface interpolant to the data given.
+!!           More specifically, given positions, (u’,v), (u,v’), and (u’,v’)
+!!           derivatives at points of a rectangular grid, the routine computes
+!!           a cubic tensor-product B-spline interpolant to the given data with
+!!           double knots at each data (the first knot vector will have double
+!!           knots at all interior points in epar1, quadruple knots at the first
+!!           and last points, and similarly for the second knot vector). The
+!! output is represented as a B-spline surface.
+
+!! INTERFACE
+!!   Subroutine s1529(ep, eder10, eder01, eder11, im1, im2, idim, ipar, rsurf, &
+!!                    jstat) 
+!!     Real(REAL64),    Intent(IN)    :: ep(*)
+!!     Real(REAL64),    Intent(IN)    :: eder10(*) 
+!!     Real(REAL64),    Intent(IN)    :: eder01(*) 
+!!     Real(REAL64),    Intent(IN)    :: eder11(*) 
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsurf
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1530 -------------------------------------
+
+  Subroutine s1530(ep, eder10, eder01, eder11, epar1, epar2, im1, im2, idim,   &
+                   rsurf, jstat) 
+
+!! PURPOSE
+!!   s1530 - To compute the cubic Hermite interpolant to the data given. More
+!!           specifically, given positions, 10, 01, and 11 derivatives at 
+!!           points of a rectangular grid, the routine computes a cubic tensor-
+!!           product B-spline interpolant to the given data with double knots
+!!           at each data point (the first knot vector will have double knots at
+!!           all interior points in epar1, quadruple knots at the first and last
+!!           points, and similarly for the second knot vector). The output is
+!!           represented as a B-spline surface.
+
+!! INTERFACE
+!!   Subroutine s1530(ep, eder10, eder01, eder11, epar1, epar2, im1, im2, idim,&
+!!                    rsurf, jstat) 
+!!     Real(REAL64),    Intent(IN)    :: ep(*)
+!!     Real(REAL64),    Intent(IN)    :: eder10(*) 
+!!     Real(REAL64),    Intent(IN)    :: eder01(*) 
+!!     Real(REAL64),    Intent(IN)    :: eder11(*) 
+!!     Real(REAL64),    Intent(IN)    :: epar1(*) 
+!!     Real(REAL64),    Intent(IN)    :: epar2(*) 
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsurf
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1538 -------------------------------------
+
+  Subroutine s1538(inbcrv, vpcurv, nctyp, astpar, iopen, iord2, iflag, rsurf,  &
+                   gpar, jstat)
+
+!! PURPOSE
+!!   s1538 - To create a lofted surface from a set of B-spline (i.e. NOT 
+!!           rational) input curves. The output is represented as a B-spline 
+!!           surface.
+
+!! INTERFACE
+!!   Subroutine s1538(inbcrv, vpcurv, nctyp, astpar, iopen, iord2, iflag,      &
+!!                    rsurf, gpar, jstat)
+!!     Integer,                         Intent(IN)    :: inbcrv 
+!!     Type(SISLcurve),                 Intent(IN)    :: vpcurv(*)
+!!     Integer,                         Intent(IN)    :: nctyp(*)
+!!     Real(REAL64),                    Intent(IN)    :: astpar
+!!     Integer,                         Intent(IN)    :: iopen 
+!!     Integer,                         Intent(IN)    :: iord2
+!!     Integer,                         Intent(IN)    :: iflag
+!!     Type(SISLsurf),                  Intent(INOUT) :: rsurf
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gpar(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1539 -------------------------------------
+
+  Subroutine s1539(inbcrv, vpcurv, nctyp, epar, astpar, iopen, iord2, iflag,   &
+                   rsurf, gpar, jstat)
+
+!! PURPOSE
+!!   s1539 - To create a spline lofted surface from a set of input curves. The
+!!           parametrization of the position curves is given in epar.
+
+!! INTERFACE
+!!   Subroutine s1539(inbcrv, vpcurv, nctyp, epar, astpar, iopen, iord2,       &
+!!                    iflag, rsurf, gpar, jstat)
+!!     Integer,                         Intent(IN)    :: inbcrv 
+!!     Type(SISLcurve),                 Intent(IN)    :: vpcurv(*)
+!!     Integer,                         Intent(IN)    :: nctyp(*)
+!!     Real(REAL64),                    Intent(IN)    :: epar(*) 
+!!     Real(REAL64),                    Intent(IN)    :: astpar
+!!     Integer,                         Intent(IN)    :: iopen 
+!!     Integer,                         Intent(IN)    :: iord2
+!!     Integer,                         Intent(IN)    :: iflag
+!!     Type(SISLsurf),                  Intent(INOUT) :: rsurf
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gpar(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1508 -------------------------------------
+
+  Subroutine s1508(inbcrv, vpcurv, par_arr, rsurf, jstat) 
+
+!! PURPOSE
+!!   s1508 - To create a rational lofted surface from a set of rational input-
+!!           curves
+
+!! INTERFACE
+!!   Subroutine s1508(inbcrv, vpcurv, par_arr, rsurf, jstat) 
+!!     Integer,                         Intent(IN)    :: inbcrv 
+!!     Type(SISLcurve),                 Intent(IN)    :: vpcurv(*)
+!!     Real(REAL64),                    Intent(IN)    :: par_arr(*) 
+!!     Type(SISLsurf),                  Intent(INOUT) :: rsurf
+!!     Integer,                         Intent(INOUT) :: jstat
+
+!---------------------------------- s1390 -------------------------------------
+
+  Subroutine s1390(curves, rsurf, numder, stat) 
+
+!! PURPOSE
+!! s1390 - Make a 4-edged blending surface between 4 B-spline (i.e. NOT
+!!         rational) curves where each curve is associated with a number of
+!!         cross-derivative B-spline (i.e. NOT rational) curves. The output is
+!!         represented as a B-spline surface. The input curves are numbered
+!1         successively around the blending parameter, and the directions
+!!         of the curves are expected to be directed in the positive u or v 
+!!         directions with cross-derivatives always pointing into the patch
+
+!! INTERFACE
+!!   Subroutine s1390(curves, rsurf, numder, stat) 
+!!     Type(SISLcurve),                 Intent(IN)    :: curves(:)
+!!     Type(SISLsurf),                  Intent(INOUT) :: rsurf
+!!     Integer,                         Intent(IN)    :: numder(4) 
+!!     Integer,                         Intent(INOUT) :: stat
+ 
+!---------------------------------- s1391 -------------------------------------
+
+  Subroutine s1391(pc, ws, icurv, nder, jstat) 
+
+!! PURPOSE
+!!   s1391 - To create a first derivative continuous blending surface set
+!!           over a 3-, 4-, 5- and 6-sided region in space. The boundary of the
+!!           region are B-spline (i.e. NOT rational) curves and the cross
+!!           boundary derivatives are given as B-spline (i.e. NOT rational)
+!!           curves. This function automatically preprocesses the input cross
+!!           tangent curves in order to make them suitable for the blending. 
+!!           Thus, the cross tangent curves should be taken as the cross tangents 
+!!           of the surrounding surface. It is not necessary and not advisable
+!!           to match tangents etc. in the corners. The output is represented as
+!!           a set of B-spline surfaces
+
+!! INTERFACE
+!!   Subroutine s1391(pc, ws, icurv, nder, jstat) 
+!!     Type(SISLcurve),              Intent(IN)    :: pc(:)
+!!     Type(SISLsurf),  ALLOCATABLE, Intent(INOUT) :: ws(:)
+!!     Integer,                      Intent(IN)    :: icurv
+!!     Integer,                      Intent(IN)    :: nder(icurv)
+!!     Integer,                      Intent(INOUT) :: jstat
+
+!---------------------------------- s1401 -------------------------------------
+
+  Subroutine s1401(vcurv, etwist, rsurf, jstat) 
+
+!! PURPOSE
+!!   s1401 - Compute a Gordon patch, given position and cross tangent con-
+!!           ditions as B-spline (i.e. NOT rational) curves at the boundary of
+!!           a squared region and the twist vector in the corners. The output
+!!           is represented as a B-spline surface.
+
+!! INTERFACE
+!!   Subroutine s1401(vcurv, etwist, rsurf, jstat) 
+!!     Type(SISLcurve), Intent(IN)    :: vcurv(8)
+!!     Real(REAL64),    Intent(IN)    :: etwist(*) 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsurf
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1620 -------------------------------------
+
+  Subroutine s1620(epoint, inbpnt1, inbpnt2, ipar, iopen1, iopen2, ik1, ik2,   &
+                   idim, rs, jstat)
+
+!! PURPOSE
+!!   s1620 - To calculate a surface using the input points as control vertices.
+!!           The parametrization is calculated according to ipar. The output
+!!           is represented as a B-spline surface.
+
+!! INTERFACE
+!!   Subroutine s1620(epoint, inbpnt1, inbpnt2, ipar, iopen1, iopen2, ik1, ,   &
+!!                    ik2, idim, rs, jstat)
+!!     Real(REAL64),    Intent(IN)    :: epoint(*) 
+!!     Integer,         Intent(IN)    :: inbpnt1 
+!!     Integer,         Intent(IN)    :: inbpnt2 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Integer,         Intent(IN)    :: ik1 
+!!     Integer,         Intent(IN)    :: ik2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Type(SISLsurf),  Intent(INOUT) :: rs
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1332 -------------------------------------
+
+  Subroutine s1332(curve1, curve2, epsge, point, surf, stat) 
+
+!! PURPOSE
+!!   s1332 - To create a linear swept surface by making the tensor-product of
+!!           two curves.
+
+!! INTERFACE
+!!   Subroutine s1332(curve1, curve2, epsge, point, surf, stat) 
+!!     Type(SISLcurve), Intent(IN)    :: curve1
+!!     Type(SISLcurve), Intent(IN)    :: curve2
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(IN)    :: point(*) 
+!!     Type(SISLsurf),  Intent(INOUT) :: surf
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1302 -------------------------------------
+
+  Subroutine s1302(curve, epsge, angle, point, axis, surf, stat)
+
+!! PURPOSE
+!!   s1302 - To create a rotational swept surface by rotating a curve a given
+!!           angle around the axis defined by point[ ] and axis[ ]. The maxi-
+!!           mal deviation allowed between the true rotational surface and the
+!!           generated surface, is epsge. If epsge is set to 0, a NURBS surface
+!!           is generated and if epsge > 0, a B-spline surface is generated.
+
+!! INTERFACE
+!!   Subroutine s1302(curve, epsge, angle, point, axis, surf, stat)
+!!     Type(SISLcurve), Intent(IN)    :: curve
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(IN)    :: angle 
+!!     Real(REAL64),    Intent(IN)    :: point(*) 
+!!     Real(REAL64),    Intent(IN)    :: axis(*) 
+!!     Type(SISLsurf),  Intent(INOUT) :: surf
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1365 -------------------------------------
+
+  Subroutine s1365(ps, aoffset, aepsge, amax, idim, rs, jstat)
+
+!! PURPOSE
+!!   s1365 - Create a surface approximating the offset of a surface. The output
+!!           is represented as a B-spline surface.
+!!           With an offset of zero, this routine can be used to approximate any
+!!           NURBS (rational) surface with a B-spline (non-rational) surface.
+
+!! INTERFACE
+!!   Subroutine s1365(ps, aepsge, amax, idim, rs, jstat)
+!!     Type(SISLsurf), Intent(IN)    :: ps 
+!!     Real(REAL64),   Intent(IN)    :: aoffset 
+!!     Real(REAL64),   Intent(IN)    :: aepsge 
+!!     Real(REAL64),   Intent(IN)    :: amax 
+!!     Integer,        Intent(IN)    :: idim 
+!!     Type(SISLsurf), Intent(INOUT) :: rs
+!!     Integer,        Intent(INOUT) :: jstat
+
+!---------------------------------- s1601 -------------------------------------
+
+  Subroutine s1601(psurf, epoint, enorm, idim, rsurf, stat)
+
+!! PURPOSE
+!!   s1601 - Mirror a surface about a plane.
+
+!! INTERFACE
+!!   Subroutine s1601(psurf, epoint, enorm, idim, rsurf, stat)
+!!     Type(SISLsurf), Intent(IN)    :: psurf
+!!     Real(REAL64),   Intent(IN)    :: epoint(*) 
+!!     Real(REAL64),   Intent(IN)    :: enorm(*) 
+!!     Integer,        Intent(IN)    :: idim 
+!!     Type(SISLsurf), Intent(INOUT) :: rsurf
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1388 -------------------------------------
+
+  Subroutine s1388(surf, coons, numcoons1, numcoons2, dim, stat)
+
+!! PURPOSE
+!!   s1388 - To convert a surface of order less than or equal to 4 in both direc
+!!           -tions to a mesh of Coons patches with uniform parameterization.
+!!           This subroutine assumes that the surface is C1 continuous.
+
+!! INTERFACE
+!!   Subroutine s1388(surf, coons, numcoons1, numcoons2, dim, stat)
+!!     Type(SISLsurf),              Intent(IN)    :: surf
+!!     Real(REAL64),   ALLOCATABLE, Intent(INOUT) :: coons(:)
+!!     Integer,                     Intent(INOUT) :: numcoons1 
+!!     Integer,                     Intent(INOUT) :: numcoons2 
+!!     Integer,                     Intent(INOUT) :: dim 
+!!     Integer,                     Intent(INOUT) :: stat
+
+!---------------------------------- s1731 -------------------------------------
+
+  Subroutine s1731(surf, newsurf, stat) 
+
+!! PURPOSE
+!!   s1731 - To convert a surface to a mesh of Bezier surfaces. The Bezier
+!!           surfaces are stored in a surface with all knots having multiplicity
+!!           equal to the order of the surface in the corresponding parameter
+!!           direction. If the input surface is rational, the generated Bezier
+!!           surfaces will be rational too (i.e. there will be rational weights
+!!           in the representation of the Bezier surfaces).
+
+!! INTERFACE
+!!   Subroutine s1731(surf, newsurf, stat) 
+!!     Type(SISLsurf), Intent(IN)    :: surf 
+!!     Type(SISLsurf), Intent(INOUT) :: newsurf
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1733 -------------------------------------
+
+  Subroutine s1733(surf, number1, number2, startpar1, endpar1, startpar2,      &
+                   endpar2, coef, stat)
+
+!! PURPOSE
+!!   s1733 - To pick the next Bezier surface from a surface. This function
+!!           requires a surface represented as the result of s1731. 
+!!           This routine does not check that the surface is correct. If
+!!           the input surface is rational, the generated Bezier surfaces will
+!!           be rational too (i.e. there will be rational weights in the
+!!           representation of the Bezier surfaces).
+
+!! INTERFACE
+!!   Subroutine s1733(surf, number1, number2, startpar1, endpar1, startpar2,   &
+!!                    endpar2, coef, stat)
+!!     Type(SISLsurf), Intent(IN)    :: surf
+!!     Integer,        Intent(IN)    :: number1 
+!!     Integer,        Intent(IN)    :: number2 
+!!     Real(REAL64),   Intent(INOUT) :: startpar1 
+!!     Real(REAL64),   Intent(INOUT) :: endpar1 
+!!     Real(REAL64),   Intent(INOUT) :: startpar2 
+!!     Real(REAL64),   Intent(INOUT) :: endpar2
+!!     Real(REAL64),   Intent(INOUT) :: coef(*)
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1387 -------------------------------------
+
+  Subroutine s1387(surf, order1, order2, newsurf, stat) 
+
+!! PURPOSE
+!!   s1387 - To express a surface as a surface of higher order.
+
+!! INTERFACE
+!!   Subroutine s1387(surf, order1, order2, newsurf, stat) 
+!!     Type(SISLsurf), Intent(IN)    :: surf 
+!!     Integer,        Intent(IN)    :: order1 
+!!     Integer,        Intent(IN)    :: order2 
+!!     Type(SISLsurf), Intent(INOUT) :: newsurf
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1386 -------------------------------------
+
+  Subroutine s1386(surf, der1, der2, newsurf, stat) 
+
+!! PURPOSE
+!!   s1386 - To express the (der1, der2)-th derivative of an open surface as a
+!!           surface.
+
+!! INTERFACE
+!!   Subroutine s1386(surf, der1, der2, newsurf, stat) 
+!!     Type(SISLsurf), Intent(IN)    :: surf 
+!!     Integer,        Intent(IN)    :: der1 
+!!     Integer,        Intent(IN)    :: der2 
+!!     Type(SISLsurf), Intent(INOUT) :: newsurf
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1023 -------------------------------------
+
+  Subroutine s1023(centre, axis, equator, latitude, longitude, sphere, stat)
+
+!! PURPOSE
+!!   s1023 - To express the octants of a sphere as a surface. This can also be
+!!           used to describe the complete sphere. The sphere/the octants of
+!!           the sphere will be geometrically exact.
+
+!! INTERFACE
+!!   Subroutine s1023(centre, axis, equator, latitude, longitude, sphere, stat)
+!!     Real(REAL64),   Intent(IN)    :: centre(*)
+!!     Real(REAL64),   Intent(IN)    :: axis(*)
+!!     Real(REAL64),   Intent(IN)    :: equator(*)
+!!     Integer,        Intent(IN)    :: latitude 
+!!     Integer,        Intent(IN)    :: longitude 
+!!     Type(SISLsurf), Intent(INOUT) :: sphere
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1021 -------------------------------------
+
+  Subroutine s1021(bottom_pos, bottom_axis, ellipse_ratio, axis_dir, height,   &
+                   cyl, stat)
+
+!! PURPOSE
+!!   s1021 - To express a truncated cylinder as a surface. The cylinder can be
+!!           elliptic. The cylinder will be geometrically exact.
+
+!! INTERFACE
+!!   Subroutine s1021(bottom_pos, bottom_axis, ellipse_ratio, axis_dir, height,&
+!!                    cyl, stat)
+!!     Real(REAL64),   Intent(IN)    :: bottom_pos(*)
+!!     Real(REAL64),   Intent(IN)    :: bottom_axis(*)
+!!     Real(REAL64),   Intent(IN)    :: ellipse_ratio 
+!!     Real(REAL64),   Intent(IN)    :: axis_dir(*)
+!!     Real(REAL64),   Intent(IN)    :: height 
+!!     Type(SISLsurf), Intent(INOUT) :: cyl
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1024 -------------------------------------
+
+  Subroutine s1024(centre, axis, equator, minor_radius, start_minor,           &
+                   end_minor, numb_major, torus, stat)
+
+!! PURPOSE
+!!   s1024 - To express the octants of a torus as a surface. This can also be
+!!           used to describe the complete torus. The torus/the octants of the
+!!           torus will be geometrically exact.
+
+!! INTERFACE
+!!   Subroutine s1024(centre, axis, equator, minor_radius, start_minor,        &
+!!                    end_minor, numb_major, torus, stat)
+!!     Real(REAL64),   Intent(IN)    :: centre(*)
+!!     Real(REAL64),   Intent(IN)    :: axis(*)
+!!     Real(REAL64),   Intent(IN)    :: equator(*)
+!!     Real(REAL64),   Intent(IN)    :: minor_radius 
+!!     Integer,        Intent(IN)    :: start_minor 
+!!     Integer,        Intent(IN)    :: end_minor 
+!!     Integer,        Intent(IN)    :: numb_major 
+!!     Type(SISLsurf), Intent(INOUT) :: torus
+!!     Integer,        Intent(INOUT) :: stat
+
+!---------------------------------- s1022 -------------------------------------
+
+  Subroutine s1022(bottom_pos, bottom_axis, ellipse_ratio, axis_dir,           &
+                   cone_angle, height, cone, stat)
+
+!! PURPOSE
+!!   s1022 - To express a truncated cone as a surface. The cone can be elliptic.
+!!           The cone will be geometrically exact.
+
+!! INTERFACE
+!!   Subroutine s1022(bottom_pos, bottom_axis, ellipse_ratio, axis_dir,        &
+!!                    cone_angle, height, cone, stat)
+!!     Real(REAL64),   Intent(IN)    :: bottom_pos(*)
+!!     Real(REAL64),   Intent(IN)    :: bottom_axis(*)
+!!     Real(REAL64),   Intent(IN)    :: ellipse_ratio 
+!!     Real(REAL64),   Intent(IN)    :: axis_dir(*)
+!!     Real(REAL64),   Intent(IN)    :: cone_angle 
+!!     Real(REAL64),   Intent(IN)    :: height 
+!!     Type(SISLsurf), Intent(INOUT) :: cone
+!!     Integer,        Intent(INOUT) :: stat
+
+
+7.0 Surface Interrogation
+
+
+!-------------------------------- newIntCurve ---------------------------------
+
+  Subroutine newIntCurve(numgdpt, numpar1, numpar2, guidepar1, guidepar2,      &
+                         itype, IntCurve)
+
+!! PURPOSE
+!!   newIntcurve - Create and initialize a SISLIntcurve-instance. Note that thes
+!!   arrays guidepar1 and guidepar2 will be freed by freeIntcurve. In most
+!!   cases the SISLIntcurve objects will be generated internally in the
+!!   SISL intersection routines.
+
+!! INTERFACE
+!!   Subroutine newIntCurve(numgdpt, numpar1, numpar2, guidepar1, guidepar2,   &
+!!                          itype, IntCurve)
+!!     Integer,                    Intent(IN)    :: numgdpt 
+!!     Integer,                    Intent(IN)    :: numpar1
+!!     Integer,                    Intent(IN)    :: numpar2
+!!     Real(REAL64),               Intent(IN)    :: guidepar1(*)
+!!     Real(REAL64),               Intent(IN)    :: guidepar2(*)
+!!     Integer,                    Intent(IN)    :: itype 
+!!     Type(SISLIntcurve), TARGET, Intent(INOUT) :: IntCurve
+
+!------------------------------- freeIntCurve ---------------------------------
+
+  Subroutine freeIntCurve(intCurve)
+
+!! PURPOSE
+!!   freeIntcurve - Free the space occupied by a SISLIntcurve.
+!!   Note that the arrays guidepar1 and guidepar2 will be freed as well.
+
+!! INTERFACE
+!!   Subroutine freeIntCurve(intCurve)
+!!     Type(SISLIntCurve), Target, Intent(INOUT) :: intCurve
+
+
+!------------------------------- freeIntCrvlist -------------------------------
+
+  Subroutine freeIntCrvlist(IntCurve, icrv)
+
+!! PURPOSE
+!!   freeIntcrvlist - Free a list of SISLIntcurve.
+
+!! INTERFACE
+!!   Subroutine freeIntCrvlist(IntCurve, icrv)
+!!     Type(SISLIntCurve), Target, Intent(INOUT) :: IntCurve(*)
+!!     Integer,                    Intent(IN)    :: icrv
+
+! S1850 is same routine as in Curve_Interrogation module
+! S1371 is same routine as in Curve_Interrogation module
+
+!---------------------------------- s1372 -------------------------------------
+
+  Subroutine s1372(curve, point, dir, radius, dim, epsco, epsge, numintpt,     &
+                   intpar, numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1372 - Find all the intersections between a curve and a cylinder.
+
+!! INTERFACE
+!!   Subroutine s1372(curve, point, dir, radius, dim, epsco, epsge, numintpt, &
+!!                    intpar, numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Real(REAL64),                    Intent(IN)    :: dir(*)
+!!     Real(REAL64),                    Intent(IN)    :: radius 
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1373 -------------------------------------
+
+  Subroutine s1373(curve, top, axispt, conept, dim, epsco, epsge, numintpt,    &
+                   intpar, numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1373 - Find all the intersections between a curve and a cone.
+
+!! INTERFACE
+!!   Subroutine s1373(curve, top, axispt, conept, dim, epsco, epsge, numintpt, &
+!!                    intpar, numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: top(*)
+!!     Real(REAL64),                    Intent(IN)    :: axispt(*)
+!!     Real(REAL64),                    Intent(IN)    :: conept(*) 
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1502 -------------------------------------
+
+  Subroutine s1502(curve, basept, normdir, ellipaxis, alpha, ratio, dim,       &
+                   epsco, epsge, numintpt, intpar, numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1502 - Find all the intersections between a curve and an elliptic cone.
+
+!! INTERFACE
+!!   Subroutine s1502(curve, basept, normdir, ellipaxis, alpha, ratio, dim,  &
+!!                    epsco, epsge, numintpt, intpar, numintcu, intcurve,    &
+!!                    stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: basept(*)
+!!     Real(REAL64),                    Intent(IN)    :: normdir(*)
+!!     Real(REAL64),                    Intent(IN)    :: ellipaxis(*) 
+!!     Real(REAL64),                    Intent(IN)    :: alpha
+!!     Real(REAL64),                    Intent(IN)    :: ratio
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+ 
+
+!---------------------------------- s1375 -------------------------------------
+
+  Subroutine s1375(curve, centre, normal, centdis, rad, dim, epsco, epsge,     &
+                   numintpt, intpar, numintcu, intcurve, stat)
+
+!! PURPOSE
+!!   s1375 - Find all the intersections between a curve and a torus
+
+!! INTERFACE
+!!   Subroutine s1375(curve, centre, normal, centdis, rad, dim, epsco, epsge, &
+!!                    numintpt, intpar, numintcu, intcurve, stat)
+!!     Type(SISLcurve),                 Intent(IN)    :: curve
+!!     Real(REAL64),                    Intent(IN)    :: centre(*)
+!!     Real(REAL64),                    Intent(IN)    :: normal(*)
+!!     Real(REAL64),                    Intent(IN)    :: centdis
+!!     Real(REAL64),                    Intent(IN)    :: rad
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: intpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcu
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1870 -------------------------------------
+
+  Subroutine s1870(ps1, pt1, idim, aepsge, jpt, gpar1, jcrv, wcurve, jstat)
+
+!! PURPOSE
+!!   s1870 - Find all intersections between a surface and a point.
+
+!! INTERFACE
+!!   Subroutine s1870(ps1, pt1, idim, aepsge, jpt, gpar1, jcrv, wcurve, jstat)
+!!     Type(SISLsurf),                  Intent(IN)    :: ps1
+!!     Real(REAL64),                    Intent(IN)    :: pt1(*)
+!!     Integer,                         Intent(IN)    :: idim
+!!     Real(REAL64),                    Intent(IN)    :: aepsge
+!!     Integer,                         Intent(INOUT) :: jpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gpar1(:)
+!!     Integer,                         Intent(INOUT) :: jcrv
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: wcurve(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+
+!---------------------------------- s1856 -------------------------------------
+
+  Subroutine s1856(surf, point, linedir, dim, epsco, epsge, numintpt,          &
+                   pointpar, numintcr, intcurves, stat)
+
+!! PURPOSE
+!!   s1856 - Find all intersections between a tensor-product surface and an
+!!           infinite straight line.
+
+!! INTERFACE
+!!   Subroutine s1856(surf, point, linedir, dim, epsco, epsge, numintpt,      &
+!!                    pointpar, numintcr, intcurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Real(REAL64),                    Intent(IN)    :: linedir(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1518 -------------------------------------
+
+  Subroutine s1518(surf, point, dir, epsge, start, end, parin, parout, stat)
+
+!! PURPOSE
+!!   s1518 - Newton iteration on the intersection between a 3D NURBS surface
+!!           and a line. If a good initial guess is given, the intersection will
+!!           be found quickly. However if a bad initial guess is given, the 
+!!           iteration might not converge. We only search in the rectangular
+!!           subdomain specified by ”start” and ”end”. This can be the whole
+!!           domain if desired.
+
+!! INTERFACE
+!!   Subroutine s1518(surf, point, dir, epsge, start, end, parin, parout, stat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Real(REAL64),    Intent(IN)    :: point(*)
+!!     Real(REAL64),    Intent(IN)    :: dir(*)
+!!     Real(REAL64),    Intent(IN)    :: epsge
+!!     Real(REAL64),    Intent(IN)    :: start(*)
+!!     Real(REAL64),    Intent(IN)    :: end(*)
+!!     Real(REAL64),    Intent(IN)    :: parin(*)
+!!     Real(REAL64),    Intent(INOUT) :: parout(*) 
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- 1328 -------------------------------------
+
+  Subroutine s1328(psold, epoint, enorm1, enorm2, idim, rsnew, jstat)
+
+!! PURPOSE
+!!   s1328 - Put the equation of the surface pointed at by psold into two planes
+!!           given by the point epoint and the normals enorm1 and enorm2.
+!!           The result is an equation where the new two-dimensional surface
+!!           rsnew is to be equal to origo.
+
+!! INTERFACE
+!!   Subroutine s1328(psold, epoint, enorm1, enorm2, idim, rsnew, jstat)
+!!     Type(SISLsurf), Intent(IN)    :: psold
+!!     Real(REAL64),   Intent(IN)    :: epoint(*)
+!!     Real(REAL64),   Intent(IN)    :: enorm1(*)
+!!     Real(REAL64),   Intent(IN)    :: enorm2(*)
+!!     Integer,        Intent(IN)    :: idim
+!!     Type(SISLsurf), Intent(INOUT) :: rsnew
+!!     Integer,        Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1855 -------------------------------------
+
+  Subroutine s1855(surf, centre, radius, normal, dim, epsco, epsge, numintpt,  &
+                   pointpar, numintcr, intcurves, stat)
+
+!! PURPOSE
+!!   s1855 - Find all intersections between a tensor-product surface and a full
+!!           circle.
+
+!! INTERFACE
+!!   Subroutine s1855(surf, centre, radius, normal, dim, epsco, epsge,         &
+!!                    numintpt, pointpar, numintcr, intcurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: centre(*)
+!!     Real(REAL64),                    Intent(IN)    :: radius 
+!!     Real(REAL64),                    Intent(IN)    :: normal(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1858 -------------------------------------
+
+  Subroutine s1858(surf, curve, epsco, epsge, numintpt, pointpar1, pointpar2,  &
+                   numintcr, intcurves, stat)
+
+!! PURPOSE
+!!   s1858 - Find all intersections between a surface and a curve. Intersection
+!!           curves are described by guide points. To pick the intersection
+!!           curves use s1712
+
+!! INTERFACE
+!!   Subroutine s1858(surf, curve, epsco, epsge, numintpt, pointpar1,         &
+!!                    pointpar2, numintcr, intcurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Type(SISLcurve),                 Intent(IN)    :: curve 
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar1(:)
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar2(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1851 -------------------------------------
+
+  Subroutine s1851(surf, point, normal, dim, epsco, epsge, numintpt,          &
+                   pointpar, numintcr, intcurves, stat)
+
+!! PURPOSE
+!!   s1851 - Find all intersections between a tensor-product surface and a
+!!           plane. Intersection curves are described by guide points. To make
+!!           the intersection curves use s1314.
+
+!! INTERFACE
+!!   Subroutine s1851(surf, point, normal, dim, epsco, epsge, numintpt,       &
+!!                    pointpar, numintcr, intcurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Real(REAL64),                    Intent(IN)    :: normal(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1852 -------------------------------------
+
+  Subroutine s1852(surf, centre, radius, dim, epsco, epsge, numintpt,          &
+                   pointpar, numintcr, intcurves, stat)
+
+!! PURPOSE
+!!   s1852 - Find all intersections between a tensor-product surface and a
+!!           sphere. Intersection curves are described by guide points. To pro-
+!!           duce the intersection curves use s1315.
+
+!! INTERFACE
+!!   Subroutine s1852(surf, centre, radius, dim, epsco, epsge, numintpt,      &
+!!                    pointpar, numintcr, intcurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: centre(*)
+!!     Real(REAL64),                    Intent(IN)    :: radius
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1853 -------------------------------------
+
+  Subroutine s1853(surf, point, cyldir, radius, dim, epsco, epsge, numintpt,   &
+                   pointpar, numintcr, intcurve, stat)
+
+!! PURPOSE
+!!   s1853 - Find all intersections between a tensor-product surface and a
+!!           cylinder. Intersection curves are described by guide points. To
+!!           produce the intersection curves use s1316.
+
+!! INTERFACE
+!!   Subroutine s1853(surf, point, cyldir, radius, dim, epsco, epsge, numintpt,&
+!!                    pointpar, numintcr, intcurve, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Real(REAL64),                    Intent(IN)    :: cyldir(*)
+!!     Real(REAL64),                    Intent(IN)    :: radius 
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1854 -------------------------------------
+
+  Subroutine s1854(surf, toppt, axispt, conept, dim, epsco, epsge, numintpt,   &
+                   pointpar, numintcr, intcurve, stat)
+
+!! PURPOSE
+!!   s1854 - Find all intersections between a tensor-product surface and a cone.
+!!           Intersection curves are described by guide points. To produce the
+!!           intersection curves use s1317.
+
+!! INTERFACE
+!!   Subroutine s1854(surf, toppt, axispt, conept, dim, epsco, epsge, numintpt,&
+!!                    pointpar, numintcr, intcurve, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Real(REAL64),                    Intent(IN)    :: toppt(*)
+!!     Real(REAL64),                    Intent(IN)    :: axispt(*)
+!!     Real(REAL64),                    Intent(IN)    :: conept(*) 
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1503 -------------------------------------
+
+  Subroutine s1503(surf, basept, normdir, ellipaxis, alpha, ratio, dim,        &
+                   epsco, epsge, numintpt, pointpar, numintcr, intcurve, stat)
+
+!! PURPOSE
+!!   s1503 - Find all intersections between a tensor-product surface and an
+!!           elliptic cone. Intersection curves are described by guide points.
+!!           To produce the intersection curves use s1501.
+
+!! INTERFACE
+!!   Subroutine s1503(surf, basept, normdir, ellipaxis, alpha, ratio, dim,    &
+!!                    epsco, epsge, numintpt, pointpar, numintcr, intcurve,   &
+!!                    stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: basept(*)
+!!     Real(REAL64),                    Intent(IN)    :: normdir(*)
+!!     Real(REAL64),                    Intent(IN)    :: ellipaxis(*) 
+!!     Real(REAL64),                    Intent(IN)    :: alpha
+!!     Real(REAL64),                    Intent(IN)    :: ratio
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+
+!---------------------------------- s1369 -------------------------------------
+
+  Subroutine s1369(surf, centre, normal, cendis, rad, dim, epsco, epsge,       &
+                   numintpt, pointpar, numintcr, intcurve, stat)
+
+!! PURPOSE
+!!   s1369 - Find all intersections between a surface and a torus. Intersection
+!!           curves are described by guide points. To produce the intersection
+!!           curves use s1318.
+
+!! INTERFACE
+!!   Subroutine s1369(surf, centre, normal, cendis, rad, dim, epsco, epsge,   &
+!!                    numintpt, pointpar, numintcr, intcurve, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: centre(*)
+!!     Real(REAL64),                    Intent(IN)    :: normal(*)
+!!     Real(REAL64),                    Intent(IN)    :: cendis
+!!     Real(REAL64),                    Intent(IN)    :: rad
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurve(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1859 -------------------------------------
+
+  Subroutine s1859(surf1, surf2, epsco, epsge, numintpt, pointpar1, pointpar2, &
+                   numintcr, intcurves, stat)
+
+!! PURPOSE
+!!   s1859 - Find all intersections between two surfaces. Intersection curves
+!!           are described by guide points. To produce the intersection curves
+!!           use s1310.
+
+!! INTERFACE
+!!   Subroutine s1859(surf1, surf2, epsco, epsge, numintpt, pointpar1,        &
+!!                    pointpar2, numintcr, intcurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf1
+!!     Type(SISLsurf),                  Intent(IN)    :: surf2 
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numintpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar1(:)
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar2(:)
+!!     Integer,                         Intent(INOUT) :: numintcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: intcurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1860 -------------------------------------
+
+  Subroutine s1860(surf, viewdir, dim, epsco, epsge, numsilpt, pointpar,       &
+                   numsilcr, silcurves, stat)
+
+!! PURPOSE
+!!   s1860 - Find the silhouette curves and points of a surface when the surface
+!!           is viewed from a specific direction (i.e. parallel projection). In
+!!           addition to the points and curves found by this routine, break 
+!!           curves and edge-curves might be silhouette curves. Silhouette 
+!!           curves are described by guide points. To produce the silhouette
+!!           curves use s1319.
+
+!! INTERFACE
+!!   Subroutine s1860(surf, viewdir, dim, epsco, epsge, numsilpt, pointpar,   &
+!!                    numsilcr, silcurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Real(REAL64),                    Intent(IN)    :: viewdir(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numsilpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numsilcr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: silcurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1510 -------------------------------------
+
+  Subroutine s1510(ps, eyepoint, idim, aepsco, aepsge, jpt, gpar, jcrv,        &
+                   wcurve, jstat)
+
+!! PURPOSE
+
+!!   s1510 - Find the silhouette curves and points of a surface when the surface
+!!           is viewed perspectively from a specific eye point. In addition to 
+!!           the points and curves found by this routine, break curves and edge-
+!!           curves might be silhouette curves. To march out the silhouette
+!!           curves, use s1514.
+
+!! INTERFACE
+!!   Subroutine s1510(ps, eyepoint, idim, aepsco, aepsge, jpt, gpar, jcrv,   &
+!!                    wcurve, jstat)
+!!     Type(SISLsurf),                  Intent(IN)    :: ps
+!!     Real(REAL64),                    Intent(IN)    :: eyepoint(*)
+!!     Integer,                         Intent(IN)    :: idim
+!!     Real(REAL64),                    Intent(IN)    :: aepsco
+!!     Real(REAL64),                    Intent(IN)    :: aepsge
+!!     Integer,                         Intent(INOUT) :: jpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gpar(:)
+!!     Integer,                         Intent(INOUT) :: jcrv
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: wcurve(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1511 -------------------------------------
+
+  Subroutine s1511(ps, qpoint, bvec, idim, aepsco, aepsge, jpt, gpar, jcrv,    &
+                   wcurve, jstat)
+
+!! PURPOSE
+!!   s1511 - Find the circular silhouette curves and points of a surface. In
+!!           addition to the points and curves found by this routine, break
+!!           curves and edge-curves might be silhouette curves. To march out
+!!           the silhouette curves use s1515.
+
+!! INTERFACE
+!!   Subroutine s1511(ps, qpoint, bvec, idim, aepsco, aepsge, jpt, gpar, jcrv, &
+!!                    wcurve, jstat)
+!!     Type(SISLsurf),                  Intent(IN)    :: ps
+!!     Real(REAL64),                    Intent(IN)    :: qpoint(*)
+!!     Real(REAL64),                    Intent(IN)    :: bvec(*)
+!!     Integer,                         Intent(IN)    :: idim
+!!     Real(REAL64),                    Intent(IN)    :: aepsco
+!!     Real(REAL64),                    Intent(IN)    :: aepsge
+!!     Integer,                         Intent(INOUT) :: jpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gpar(:)
+!!     Integer,                         Intent(INOUT) :: jcrv
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: wcurve(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1314 -------------------------------------
+
+  Subroutine s1314(surf, point, normal, dim, epsco, epsge, maxstep, intcurve,  &
+                   makecurv, graphic, stat)
+
+!! PURPOSE
+!!   s1314 - To march an intersection curve described by parameter pairs in an
+!!           intersection curve object, a surface and a plane. The guide points
+!!           are expected to be found by s1851. The generated geometric curves
+!!           are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1314(surf, point, normal, dim, epsco, epsge, maxstep,        &
+!!                    intcurve, makecurv, graphic, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Real(REAL64),                    Intent(IN)    :: normal(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Real(REAL64),                    Intent(IN)    :: maxstep
+!!     Type(SISLIntcurve),              Intent(INOUT) :: intcurve
+!!     Integer,                         Intent(IN)    :: makecurv
+!!     Integer,                         Intent(IN)    :: graphic
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1315 -------------------------------------
+
+  Subroutine s1315(surf, centre, radius, dim, epsco, epsge, maxstep, intcurve, &
+                   makecurv, graphic, stat)
+
+!! PURPOSE
+!!   s1315 - To march an intersection curve described by parameter pairs in an
+!!           intersection curve object, a surface and a sphere. The guide points
+!!           are expected to be found by s1852. The generated geometric curves
+!!           are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1315(surf, centre, radius, dim, epsco, epsge, maxstep,       &
+!!                    intcurve, makecurv, graphic, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Real(REAL64),                    Intent(IN)    :: centre(*)
+!!     Real(REAL64),                    Intent(IN)    :: radius
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Real(REAL64),                    Intent(IN)    :: maxstep 
+!!     Type(SISLIntcurve),              Intent(INOUT) :: intcurve
+!!     Integer,                         Intent(IN)    :: makecurv
+!!     Integer,                         Intent(IN)    :: graphic
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1316 -------------------------------------
+
+  Subroutine s1316(surf, point, cyldir, radius, dim, epsco, epsge, maxstep,    &
+                   intcurve, makecurv, graphic, stat)
+
+!! PURPOSE
+!!   1316 - To march an intersection curve described by parameter pairs in
+!!          an intersection curve object, a surface and a cylinder. The guide
+!!          points are expected to be found by s1853. The generated geometric
+!!          curves are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1316(surf, point, cyldir, radius, dim, epsco, epsge,        &
+!!                    maxstep, intcurve, makecurv, graphic, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Real(REAL64),                    Intent(IN)    :: cyldir(*)
+!!     Real(REAL64),                    Intent(IN)    :: radius
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Real(REAL64),                    Intent(IN)    :: maxstep 
+!!     Type(SISLIntcurve),              Intent(INOUT) :: intcurve
+!!     Integer,                         Intent(IN)    :: makecurv
+!!     Integer,                         Intent(IN)    :: graphic
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1317 -------------------------------------
+
+  Subroutine s1317(surf, toppt, axispt, conept, dim, epsco, epsge, maxstep,    &
+                   intcurve, makecurv, graphic, stat)
+
+!! PURPOSE
+!!   s1317 - To march an intersection curve described by parameter pairs in an
+!!           intersection curve object, a surface and a cone. The guide points
+!!           are expected to be found by s1854. The generated geometric
+!!           curves are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1317(surf, toppt, axispt, conept, dim, epsco, epsge,         &
+!!                    maxstep, intcurve, makecurv, graphic, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Real(REAL64),                    Intent(IN)    :: toppt(*)
+!!     Real(REAL64),                    Intent(IN)    :: axispt(*)
+!!     Real(REAL64),                    Intent(IN)    :: conept(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Real(REAL64),                    Intent(IN)    :: maxstep 
+!!     Type(SISLIntcurve),              Intent(INOUT) :: intcurve
+!!     Integer,                         Intent(IN)    :: makecurv
+!!     Integer,                         Intent(IN)    :: graphic
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1501 -------------------------------------
+
+  Subroutine s1501(surf, basept, normdir, ellipaxis, alpha, ratio, dim, epsco, &
+                   epsge, maxstep, intcurve, makecurv, graphic, stat)
+
+!! PURPOSE
+!!   s1501 - To march an intersection curve described by parameter pairs in
+!!           an intersection curve object, a surface and an elliptic cone. The
+!!           guide points are expected to be found by s1503. The generated
+!!           geometric curves are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1501(surf, basept, normdir, ellipaxis, alpha, ratio, dim,  &
+!!                    epsco, epsge, maxstep, intcurve, makecurv, graphic,   &
+!!                    stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: basept(*)
+!!     Real(REAL64),                    Intent(IN)    :: normdir(*)
+!!     Real(REAL64),                    Intent(IN)    :: ellipaxis(*)
+!!     Real(REAL64),                    Intent(IN)    :: alpha 
+!!     Real(REAL64),                    Intent(IN)    :: ratio
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Real(REAL64),                    Intent(IN)    :: maxstep 
+!!     Type(SISLIntcurve),              Intent(INOUT) :: intcurve
+!!     Integer,                         Intent(IN)    :: makecurv
+!!     Integer,                         Intent(IN)    :: graphic
+!!     Integer,                         Intent(INOUT) :: stat
+ 
+
+!---------------------------------- s1318 -------------------------------------
+
+  Subroutine s1318(surf, centre, normal, cendist, radius, dim, epsco, epsge,   &
+                   maxstep, intcurve, makecurv, graphic, stat)
+
+!! PURPOSE
+!!   s1318 - To march an intersection curve described by parameter pairs in an
+!!           intersection curve object, a surface and a torus. The guide points
+!!           are expected to be found by s1369. The generated geometric
+!!          curves are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1318(surf, centre, normal, cendist, radius, dim, epsco,       &
+!!                    epsge, maxstep, intcurve, makecurv, graphic, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf 
+!!     Real(REAL64),                    Intent(IN)    :: centre(*)
+!!     Real(REAL64),                    Intent(IN)    :: normal(*)
+!!     Real(REAL64),                    Intent(IN)    :: cendist
+!!     Real(REAL64),                    Intent(IN)    :: radius 
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Real(REAL64),                    Intent(IN)    :: maxstep 
+!!     Type(SISLIntcurve),              Intent(INOUT) :: intcurve
+!!     Integer,                         Intent(IN)    :: makecurv
+!!     Integer,                         Intent(IN)    :: graphic
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s1310 -------------------------------------
+
+  Subroutine s1310(surf1, surf2, intcurve, epsge, maxstep, makecurv, graphic,  &
+                   stat)
+
+!! PURPOSE
+!!   s1310 - To march an intersection curve between two surfaces. The inter-
+!!           section curve is described by guide parameter pairs stored in an
+!!           intersection curve object. The guide points are expected to be
+!!           found by s1859. The generated geometric curves are represented
+!!           as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1310(surf1, surf2, intcurve, epsge, maxstep, makecurv,        &
+!!                    graphic, stat)
+!!     Type(SISLsurf),     Intent(IN)    :: surf1
+!!     Type(SISLsurf),     Intent(IN)    :: surf2 
+!!     Type(SISLIntcurve), Intent(INOUT) :: intcurve
+!!     Real(REAL64),       Intent(IN)    :: epsge
+!!     Real(REAL64),       Intent(IN)    :: maxstep 
+!!     Integer,            Intent(IN)    :: makecurv
+!!     Integer,            Intent(IN)    :: graphic
+!!     Integer,            Intent(INOUT) :: stat
+
+
+!---------------------------------- s1319 -------------------------------------
+
+  Subroutine s1319(surf, viewdir, dim, epsco, epsge, maxstep, intcurve,        &
+                   makecurv, graphic, stat)
+
+!! PURPOSE
+!!   s1319 - To march the silhouette curve described by an intersection curve
+!!           object, a surface and a view direction (i.e. parallel projection).
+!!           The guide points are expected to be found by s1860. The generated
+!!           geometric curves are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1319(surf, viewdir, dim, epsco, epsge, maxstep, intcurve,    &
+!!                    makecurv, graphic, stat)
+!!     Type(SISLsurf),     Intent(IN)    :: surf
+!!     Real(REAL64),       Intent(IN)    :: viewdir(*)
+!!     Integer,            Intent(IN)    :: dim
+!!     Real(REAL64),       Intent(IN)    :: epsco
+!!     Real(REAL64),       Intent(IN)    :: epsge
+!!     Real(REAL64),       Intent(IN)    :: maxstep 
+!!     Type(SISLIntcurve), Intent(INOUT) :: intcurve
+!!     Integer,            Intent(IN)    :: makecurv
+!!     Integer,            Intent(IN)    :: graphic
+!!     Integer,            Intent(INOUT) :: stat
+
+
+!---------------------------------- s1514 -------------------------------------
+
+  Subroutine s1514(ps1, eyepoint, idim, aepsco, aepsge, amax, pinter, icur,    &
+                   igraph, jstat)
+
+!! PURPOSE
+!!   s1514 - To march the perspective silhouette curve described by an inter-
+!!           section curve object, a surface and an eye point. The generated
+!!           geometric curves are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1514(ps1, eyepoint, idim, aepsco, aepsge, amax, pinter,     &
+!!                    icur, igraph, jstat)
+!!     Type(SISLsurf),     Intent(IN)    :: ps1
+!!     Real(REAL64),       Intent(IN)    :: eyepoint(*)
+!!     Integer,            Intent(IN)    :: idim
+!!     Real(REAL64),       Intent(IN)    :: aepsco
+!!     Real(REAL64),       Intent(IN)    :: aepsge
+!!     Real(REAL64),       Intent(IN)    :: amax
+!!     Type(SISLIntcurve), Intent(INOUT) :: pinter
+!!     Integer,            Intent(IN)    :: icur
+!!     Integer,            Intent(IN)    :: igraph
+!!     Integer,            Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1515 -------------------------------------
+
+  Subroutine s1515(ps1, qpoint, bvec, idim, aepsco, aepsge, amax, pinter,      &
+                   icur, igraph, jstat)
+
+!! PURPOSE
+!!   s1515 - To march the circular silhouette curve described by an intersection
+!!           curve object, a surface, point Q and direction B i.e. solution of
+!!           f(u, v) = N(u, v) × (P(u, v) − Q) · B.
+!!           The generated geometric curves are represented as B-spline curves.
+
+!! INTERFACE
+!!   Subroutine s1515(ps1, qpoint, bvec, idim, aepsco, aepsge, amax, pinter,   &
+!!                    icur, igraph, jstat)
+!!     Type(SISLsurf),     Intent(IN)    :: ps1
+!!     Real(REAL64),       Intent(IN)    :: qpoint(*)
+!!     Real(REAL64),       Intent(IN)    :: bvec(*)
+!!     Integer,            Intent(IN)    :: idim
+!!     Real(REAL64),       Intent(IN)    :: aepsco
+!!     Real(REAL64),       Intent(IN)    :: aepsge
+!!     Real(REAL64),       Intent(IN)    :: amax 
+!!     Type(SISLIntcurve), Intent(INOUT) :: pinter
+!!     Integer,            Intent(IN)    :: icur
+!!     Integer,            Intent(IN)    :: igraph
+!!     Integer,            Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1450 -------------------------------------
+
+  Subroutine s1450(surf, epsge, close1, close2, degen1, degen2, degen3,        &
+                   degen4, stat)
+
+!! PURPOSE
+!!  s1450 - To check if a surface is closed or has degenerate boundaries. The
+!!          edge numbers are ordered counter-clockwise with edge no 1 at the
+!!          v=0 parameteric location
+
+!! INTERFACE
+!!   Subroutine s1450(surf, epsge, close1, close2, degen1, degen2, degen3,    &
+!!                    degen4, stat)
+!!     Type(SISLsurf), Intent(IN)    :: surf
+!!     Real(REAL64),   Intent(IN)    :: epsge
+!!     Integer,        Intent(INOUT) :: close1 
+!!     Integer,        Intent(INOUT) :: close2 
+!!     Integer,        Intent(INOUT) :: degen1 
+!!     Integer,        Intent(INOUT) :: degen2 
+!!     Integer,        Intent(INOUT) :: degen3 
+!!     Integer,        Intent(INOUT) :: degen4 
+!!     Integer,        Intent(INOUT) :: stat
+
+
+!---------------------------------- s1603 -------------------------------------
+
+  Subroutine s1603(surf, min1, min2, max1, max2, stat) 
+
+!! PURPOSE
+!!   s1603 - To pick the parameter ranges of a surface
+
+!! INTERFACE
+!!   Subroutine s1603(surf, min1, min2, max1, max2, stat) 
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Real(REAL64),    Intent(INOUT) :: min1 
+!!     Real(REAL64),    Intent(INOUT) :: min2 
+!!     Real(REAL64),    Intent(INOUT) :: max1 
+!!     Real(REAL64),    Intent(INOUT) :: max2 
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1954 -------------------------------------
+
+  Subroutine s1954(surf, point, dim, epsco, epsge, numclopt, pointpar,       &
+                   numclocr, clocurves, stat)
+
+!! PURPOSE
+!!   s1954 - Find the points on a surface lying closest to a given point.
+
+!! INTERFACE
+!!   Subroutine s1954(surf, point, dim, epsco, epsge, numclopt, pointpar,   &
+!!                    numclocr, clocurves, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Real(REAL64),                    Intent(IN)    :: point(*)
+!!     Integer,                         Intent(IN)    :: dim
+!!     Real(REAL64),                    Intent(IN)    :: epsco
+!!     Real(REAL64),                    Intent(IN)    :: epsge
+!!     Integer,                         Intent(INOUT) :: numclopt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: pointpar(:)
+!!     Integer,                         Intent(INOUT) :: numclocr
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: clocurves(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1958 -------------------------------------
+
+  Subroutine s1958(psurf, epoint, idim, aepsco, aepsge, gpar, dist, jstat)
+
+!! PURPOSE
+!!   s1958 - Find the closest point between a surface and a point. The method
+!!           is fast and should work well in clear cut cases, but there is no
+!!           guarantee it will find the right solution. As long as it doesn’t
+!!           fail, it will find exactly one point. In other cases, use s1954
+
+!! INTERFACE
+!!   Subroutine s1958(psurf, epoint, idim, aepsco, aepsge, gpar, dist, jstat)
+!!     Type(SISLsurf),     Intent(IN)    :: psurf 
+!!     Real(REAL64),       Intent(IN)    :: epoint(*)
+!!     Integer,            Intent(IN)    :: idim
+!!     Real(REAL64),       Intent(IN)    :: aepsco
+!!     Real(REAL64),       Intent(IN)    :: aepsge
+!!     Real(REAL64),       Intent(INOUT) :: gpar(2) 
+!!     Real(REAL64),       Intent(INOUT) :: dist
+!!     Integer,            Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1775 -------------------------------------
+
+  Subroutine s1775(surf, point, dim, epsge, start, end, guess, clpar, stat)
+
+!! PURPOSE
+!!   s1775 - Newton iteration on the distance function between a surface and
+!!           a point, to find a closest point or an intersection point. If a bad
+!!           choice for the guess parameters is given in, the iteration may end
+!!           at a local, not global closest point.
+
+!! INTERFACE
+!!   Subroutine s1775(surf, point, dim, epsge, start, end, guess, clpar, stat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Real(REAL64),    Intent(IN)    :: point(*)
+!!     Integer,         Intent(IN)    :: dim 
+!!     Real(REAL64),    Intent(IN)    :: epsge
+!!     Real(REAL64),    Intent(IN)    :: start(*)
+!!     Real(REAL64),    Intent(IN)    :: end(*)
+!!     Real(REAL64),    Intent(IN)    :: guess(*)
+!!     Real(REAL64),    Intent(INOUT) :: clpar(*) 
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1921 -------------------------------------
+
+  Subroutine s1921(ps, edir, idim, aepsco, aepsge, jpt, gpar, jcrv, wcurve,    &
+                   jstat)
+
+!! PURPOSE
+!!   s1921 - Find the absolute extremal points/curves of a surface along a given
+!!           direction
+
+!! INTERFACE
+!!   Subroutine s1921(ps, edir, idim, aepsco, aepsge, jpt, gpar, jcrv,        &
+!!                    wcurve, jstat)
+!!     Type(SISLsurf),                  Intent(IN)    :: ps
+!!     Real(REAL64),                    Intent(IN)    :: edir(*)
+!!     Integer,                         Intent(IN)    :: idim
+!!     Real(REAL64),                    Intent(IN)    :: aepsco
+!!     Real(REAL64),                    Intent(IN)    :: aepsge
+!!     Integer,                         Intent(INOUT) :: jpt
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: gpar(:)
+!!     Integer,                         Intent(INOUT) :: jcrv
+!!     Type(SISLIntcurve), ALLOCATABLE, Intent(INOUT) :: wcurve(:)
+!!     Integer,                         Intent(INOUT) :: jstat
+  
+! newbox defined in Curve_Interrogation
+
+!---------------------------------- s1989 -------------------------------------
+
+  Subroutine s1989(ps, emax, emin, jstat)
+
+!! PURPOSE
+!!   s1989 - Find the bounding box of a surface.
+!!           NOTE: The geometric bounding box is returned also in the ra-
+!!           tional case, that is the box in homogeneous coordinates is NOT
+!!           computed.
+
+!! INTERFACE
+!!   Subroutine s1989(ps, emax, emin, jstat)
+!!     Type(SISLsurf),              Intent(IN)    :: ps 
+!!     Real(REAL64),   ALLOCATABLE, Intent(INOUT) :: emax(:)
+!!     Real(REAL64),   ALLOCATABLE, Intent(INOUT) :: emin(:)
+!!     Integer,                     Intent(INOUT) :: jstat
+
+! newdir defined in Curve_Interrogation
+
+!---------------------------------- s1987 -------------------------------------
+
+  Subroutine s1987(ps, aepsge, jgtpi, gaxis, cang, jstat)
+
+!! PURPOSE
+!!   s1987 - Find the direction cone of a surface.
+
+!! INTERFACE
+!!   Subroutine s1987(ps, aepsge, jgtpi, gaxis, cang, jstat)
+!!     Type(SISLsurf),             Intent(IN)    :: ps 
+!!     Real(REAL64),               Intent(IN)    :: aepsge 
+!!     Integer,                    Intent(INOUT) :: jgtpi 
+!!     Real(REAL64),  ALLOCATABLE, Intent(INOUT) :: gaxis(:)
+!!     Real(REAL64),               Intent(INOUT) :: cang
+!!     Integer,                    Intent(INOUT) :: jstat
+
+
+8.0 Surface Analysis
+
+
+!---------------------------------- s2500 -------------------------------------
+
+  Subroutine s2500(surf, ider, iside1, iside2, parvalue, leftknot1,            &
+                   leftknot2, gaussian, jstat)
+
+!! PURPOSE
+!!   s2500 - To compute the Gaussian curvature K(u,v) of a spline surface at
+!!           given values (u,v) = (parvalue(1),parvalue(2)), where et1(leftknot1+1)
+!!           <= parvalue(1) < et1(leftknot1+2) and et2[leftknot2+1] <= par-
+!!           value(2) < et2([leftknot2+2). See also s2501().
+
+!! INTERFACE
+!!   Subroutine s2500(surf, ider, iside1, iside2, parvalue, leftknot1,      &
+!!                    leftknot2, gaussian, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: gaussian 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2502 -------------------------------------
+
+  Subroutine s2502(surf, ider, iside1, iside2, parvalue, leftknot1,          &
+                   leftknot2, meancurvature, jstat)
+
+!! PURPOSE
+!!   s2502 - To compute the mean curvature H(u,v) of a spline surface at given
+!!           values (u,v) = (parvalue(1),parvalue(2)), where etl[leftknot1+1] <=
+!!           parvalue(1) < etl[leftknot1+2] and et2[leftknot2+1] <= parvalue(2)
+!!           < et2[leftknot2+2].
+
+!! INTERFACE
+!!   Subroutine s2502(surf, ider, iside1, iside2, parvalue, leftknot1,      &
+!!                    leftknot2, meancurvature, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: meancurvature 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2504 -------------------------------------
+
+  Subroutine s2504(surf, ider, iside1, iside2, parvalue, leftknot1,          &
+                   leftknot2, absCurvature, jstat)
+
+!! PURPOSE
+!!   s2504 - To compute the absolute curvature A(u,v) of a spline surface at
+!!           given values (u,v) = (parvalue(1l,parvalue(2)), where et1[leftknot1+1]
+!!           <= parvalue(1) < et1[leftknot1+2] and et2[leftknot2+1] <= par-
+!!           value(2) < et2[leftknot2+2].
+
+!! INTERFACE
+!!   Subroutine s2504(surf, ider, iside1, iside2, parvalue, leftknot1,      &
+!!                    leftknot2, absCurvature, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: absCurvature 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2506 -------------------------------------
+
+  Subroutine s2506(surf, ider, iside1, iside2, parvalue, leftknot1,          &
+                   leftknot2, totalCurvature, jstat)
+
+!! PURPOSE
+!!   s2506 - To compute the total curvature T(u,v) of a surface at given val-
+!!           ues (u,v) = (parvalue[1],parvalue[2]), where et1[leftknot1+1] <= par-
+!!           value(1) < et1[leftknot1+2] and et2[leftknot2+1] <= parvalue(2) <
+!!           et2[leftknot2+2].
+
+!! INTERFACE
+!!   Subroutine s2506(surf, ider, iside1, iside2, parvalue, leftknot1,        &
+!!                    leftknot2, totalCurvature, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: totalCurvature 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2508 -------------------------------------
+
+  Subroutine s2508(surf, ider, iside1, iside2, parvalue, leftknot1,          &
+                   leftknot2, mehlum, jstat)
+
+!! PURPOSE
+!!   s2508 - To compute the second order Mehlum curvature M(u,v) of
+!!           a surface at given values (u,v) = (parvalue(1),parvalue(2)),
+!!           where et1(leftknot1+1) <= parvalue(1) < et1(leftknot1+2) and
+!!           et2(leftknot2+1) <= parvalue(2) < et2(leftknot2+2). See also s2509
+
+!! INTERFACE
+!!   Subroutine s2508(surf, ider, iside1, iside2, parvalue, leftknot1,         &
+!!                    leftknot2, mehlum, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: mehlum 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2510 -------------------------------------
+
+  Subroutine s2510(surf, ider, iside1, iside2, parvalue, leftknot1,          &
+                   leftknot2, mehlum, jstat)
+
+!! PURPOSE
+!!   s2510 - To compute the third order Mehlum curvature M(u,v) of a
+!!           surface at given values (u,v) = (parvalue(1),parvalue(2)), where
+!!           et1(leftknot1+1) <= parvalue(1) < et1(leftknot1+2), et2(leftknot2+1)
+!!           <= parvalue(2) < et2(leftknot2+2).
+
+!! INTERFACE
+!!   Subroutine s2510(surf, ider, iside1, iside2, parvalue, leftknot1,      &
+!!                    leftknot2, mehlum, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: mehlum 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2532 -------------------------------------
+
+  Subroutine s2532(surf, u_continuity, v_continuity, u_surfnumb, v_surfnumb,   &
+                   gauss_surf, stat)
+
+!! PURPOSE
+!!   s2532 - To interpolate or approximate the Gaussian curvature of a B-spline
+!!           or NURBS surface by a NURBS surface. The desired continuity
+!!           of the Gaussian curvature surface is input and this may lead to a
+!!           patchwork of output surfaces. Interpolation results in a high order
+!!           surface. If the original surface is a B-spline surface of order k, 
+!!           the result is of order 8k − 11, in the NURBS case, order 32k − 35.
+!!           To avoid instability because of this, a maximum order is applied.
+!!           This may lead to an approximation rather than an interpolation.
+
+!! INTERFACE
+!!   Subroutine s2532(surf, u_continuity, v_continuity, u_surfnumb, v_surfnumb,&
+!!                    gauss_surf, stat)
+!!     Type(SISLsurf),              Intent(IN)    :: surf
+!!     Integer,                     Intent(IN)    :: u_continuity 
+!!     Integer,                     Intent(IN)    :: v_continuity 
+!!     Integer,                     Intent(INOUT) :: u_surfnumb 
+!!     Integer,                     Intent(INOUT) :: v_surfnumb 
+!!     Type(SISLsurf), ALLOCATABLE, Intent(INOUT) :: gauss_surf(:) 
+!!     Integer,                     Intent(INOUT) :: stat
+
+!---------------------------------- s2536 -------------------------------------
+
+  Subroutine s2536(surf, u_continuity, v_continuity, u_surfnumb, v_surfnumb,   &
+                   mehlum_surf, stat)
+
+!! PURPOSE
+!!   s2536 - To interpolate or approximate the Mehlum curvature of a B-spline
+!!           or NURBS surface by a NURBS surface. The desired continuity
+!!           of the Mehlum curvature surface is input and this may lead to a
+!!           patchwork of output surfaces. Interpolation results in a high order
+!!           surface. If the original surface is a B-spline surface of order k,
+!!           the result is of order 12k − 17, in the NURBS case, order 48k − 53.
+!!           To avoid instability beacuse of this, a maximum order is applied.
+!!           This may lead to an approximation rather than an interpolation.
+
+!! INTERFACE
+!!   Subroutine s2536(surf, u_continuity, v_continuity, u_surfnumb, v_surfnumb,&
+!!                    mehlum_surf, stat)
+!!     Type(SISLsurf),              Intent(IN)    :: surf
+!!     Integer,                     Intent(IN)    :: u_continuity 
+!!     Integer,                     Intent(IN)    :: v_continuity 
+!!     Integer,                     Intent(INOUT) :: u_surfnumb 
+!!     Integer,                     Intent(INOUT) :: v_surfnumb 
+!!     Type(SISLsurf), ALLOCATABLE, Intent(INOUT) :: mehlum_surf(:) 
+!!     Integer,                     Intent(INOUT) :: stat
+ 
+!---------------------------------- s2540 -------------------------------------
+
+  Subroutine s2540(surf, curvature_type, export_par_val, pick_subpart,         &
+                   boundary, n_u, n_v, garr, stat)
+
+!! PURPOSE
+!!   s2540 - To compute a set of curvature values on a uniform grid in a
+!!           selected subset of the parameter domain of a NURBS surface.
+
+!! INTERFACE
+!!   Subroutine s2540(surf, curvature_type, export_par_val, pick_subpart,      &
+!!                    boundary, n_u, n_v, garr, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Integer,                         Intent(IN)    :: curvature_type 
+!!     Integer,                         Intent(IN)    :: export_par_val 
+!!     Integer,                         Intent(IN)    :: pick_subpart
+!!     Real(REAL64),                    Intent(IN)    :: boundary(*) 
+!!     Integer,                         Intent(IN)    :: n_u 
+!!     Integer,                         Intent(IN)    :: n_v 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: garr(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+!---------------------------------- s2542 -------------------------------------
+
+  Subroutine s2542(surf, ider, iside1, iside2, parvalue, leftknot1,          &
+                   leftknot2, k1, k2, d1, d2, jstat)
+
+!! PURPOSE
+!!   s2542 - To compute principal curvatures (k1,k2) with corresponding
+!!           principal directions (d1,d2) of a spline surface at given values
+!!           (u,v) = (parvalue(1),parvalue(2)), where etl[leftknot1+1] <= par-
+!!           value(1) < etl[leftknot1+2] and et2[leftknot2+1] <= parvalue(2) <
+!!           et2(leftknot2+2).
+
+!! INTERFACE
+!!   Subroutine s2542(surf, ider, iside1, iside2, parvalue, leftknot1,      &
+!!                    leftknot2, k1, k2, d1, d2, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: k1 
+!!     Real(REAL64),    Intent(INOUT) :: k2 
+!!     Real(REAL64),    Intent(INOUT) :: d1(*) 
+!!     Real(REAL64),    Intent(INOUT) :: d2(*) 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2544 -------------------------------------
+
+  Subroutine s2544(surf, ider, iside1, iside2, parvalue, leftknot1,          &
+                   leftknot2, norcurv, jstat)
+
+!! PURPOSE
+!!   s2544 - To compute the Normal curvature of a splne surface at
+!!           given values (u,v) = (parvalue(1),parvalue[2)) in the direc-
+!!           tion (parvalue(2),parvalue(l)) where et1(leftknot1+1) <= par-
+!!           value(1) < et1(leftknot1+2) and et2(leftknot2+1) <= parvalue(2) <
+!!           et2(leftknot2+2).
+
+!! INTERFACE
+!!   Subroutine s2544(surf, ider, iside1, iside2, parvalue, leftknot1,      &
+!!                    leftknot2, norcurv, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: norcurv(*) 
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s2545 -------------------------------------
+
+  Subroutine s2545(surf, curvature_type, export_par_val, boundary, n_u, n_v,   &
+                   scale, garr, stat)
+
+!! PURPOSE
+!!   s2545 - To compute a set of focal values on a uniform grid in a selected
+!!           subset of the parameter domain of a NURBS surface. A focal
+!!           value is a surface position offset by the surface curvature.
+
+!! INTERFACE
+!!   Subroutine s2545(surf, curvature_type, export_par_val, boundary, n_u, n_v,&
+!!                    scale, garr, stat)
+!!     Type(SISLsurf),                  Intent(IN)    :: surf
+!!     Integer,                         Intent(IN)    :: curvature_type 
+!!     Integer,                         Intent(IN)    :: export_par_val 
+!!     Real(REAL64),                    Intent(IN)    :: boundary(*) 
+!!     Integer,                         Intent(IN)    :: n_u 
+!!     Integer,                         Intent(IN)    :: n_v 
+!!     Real(REAL64),                    Intent(IN)    :: scale 
+!!     Real(REAL64),       ALLOCATABLE, Intent(INOUT) :: garr(:)
+!!     Integer,                         Intent(INOUT) :: stat
+
+
+9.0 Surface Utilities
+
+   
+!---------------------------------- newSurf ------------------------------------
+
+  Subroutine newSurf(number1, number2, order1, order2, knot1, knot2, coef,     &
+                   kind, dim, copy, surf)
+
+!! PURPOSE
+!!   newSurf - Create and initialize a surface object instance.
+
+!! INTERFACE
+!!   Subroutine newSurf(number1, number2, order1, order2, knot1, knot2, coef, &
+!!                      kind, dim, copy, surf)
+!!     Integer,        Intent(IN)    :: number1
+!!     Integer,        Intent(IN)    :: number2
+!!     Integer,        Intent(IN)    :: order1
+!!     Integer,        Intent(IN)    :: order2
+!!     Integer,        Intent(IN)    :: kind
+!!     Integer,        Intent(IN)    :: dim 
+!!     Integer,        Intent(IN)    :: copy 
+!!     Real(REAL64),   Intent(IN)    :: knot1(*)
+!!     Real(REAL64),   Intent(IN)    :: knot2(*)
+!!     Real(REAL64),   Intent(IN)    :: coef(*)
+!!     Type(SISLsurf), Intent(INOUT) :: surf
+
+!-------------------------------- copySurface ---------------------------------
+
+  Subroutine copySurface(old_surf, new_surf)
+
+!! PURPOSE
+!!   copySurface - Make a copy of a SISLSurface object.
+
+!! INTERFACE
+!!   Subroutine copySurface(old_surf, new_surf)
+!!     Type(SISLSurf), Intent(IN)    :: old_surf
+!!     Type(SISLSurf), Intent(INOUT) :: new_surf
+
+!---------------------------------- freeSurf ----------------------------------
+
+  Subroutine freeSurf(surf)
+
+!! PURPOSE
+!!   freeSurf - Free the space occupied by the surface. Before using freeSurf,
+!!              make sure that the surface object exists.
+
+!! INTERFACE
+!!   Subroutine freeSurf(surf)
+!!     Type(SISLSurf), Intent(INOUT) :: surf
+
+!---------------------------------- s1421 -------------------------------------
+
+  Subroutine s1421(surf, der, parvalue, leftknot1, leftknot2, derive, normal,  &
+                   stat)
+
+!! PURPOSE
+!!   s1421 - Evaluate the surface at a given parameter value pair. Compute
+!!           der derivatives and the normal if der ≥ 1. See also s1424
+
+!! INTERfACE
+!!   Subroutine s1421(surf, der, parvalue, leftknot1, leftknot2, derive,       &
+!!                    normal, stat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: der
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1  
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: derive(*)
+!!     Real(REAL64),    Intent(INOUT) :: normal(*)
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1424 -------------------------------------
+
+  Subroutine s1424(surf, der1, der2, parvalue, leftknot1, leftknot2, derive,   &
+                   stat)
+
+!! PURPOSE
+!!   s1424 - Evaluate the surface the parameter value (parvalue(1), par-
+!!           value(2)). Compute the der1 × der2 first derivatives. The deriva-
+!!           tives that will be computed are D i,j , i = 1, 2, . . . , der1+1, 
+!!           j=1, 2, ..., der2+1.
+
+!! INTERFACE
+!!   Subroutine s1424(surf, der1, der2, parvalue, leftknot1, leftknot2,   &
+!!                    derive, stat)
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: der1
+!!     Integer,         Intent(IN)    :: der2
+!!     Real(REAL64),    Intent(IN)    :: parvalue(*)
+!!     Integer,         Intent(INOUT) :: leftknot1  
+!!     Integer,         Intent(INOUT) :: leftknot2
+!!     Real(REAL64),    Intent(INOUT) :: derive(*)
+!!     Integer,         Intent(INOUT) :: stat
+
+!---------------------------------- s1422 -------------------------------------
+
+  Subroutine s1422(ps1, ider, iside1, iside2, epar, ilfs, ilft, eder, enorm,  &
+                   jstat)
+
+!! PURPOSE
+!!   s1422 - Evaluate and compute the left- or right-hand derivatives of a sur-
+!!           face at a given parameter position.
+
+!! INTERFACE
+!!   Subroutine s1422(ps1, ider, iside1, iside2, epar, ilfs, ilft, eder,   &
+!!                    enorm, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: ps1 
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: epar(*)
+!!     Integer,         Intent(INOUT) :: ilfs  
+!!     Integer,         Intent(INOUT) :: ilft  
+!!     Real(REAL64),    Intent(INOUT) :: eder(*)
+!!     Real(REAL64),    Intent(INOUT) :: enorm(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1425 -------------------------------------
+
+  Subroutine s1425(ps1, ider1, ider2, iside1, iside2, epar, ileft1, ileft2,    &
+                   eder, jstat)
+
+!! PURPOSE
+!!   s1425 - To compute the value and ider1 × ider2 first derivatives of a ten-
+!!           sor product surface at the point with parameter value (epar(1),
+!!           epar(2)). The derivatives that will be computed are D(i, j),
+!!           i = 1, 2, . . . , ider1+1, j = 1, 2, . . . , ider2+1. The
+!!           calculations are from the right hand or left hand side.
+
+!! INTERFACE
+!!   Subroutine s1425(ps1, ider1, ider2, iside1, iside2, epar, ileft1, ileft2, &
+!!                    eder, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: ps1 
+!!     Integer,         Intent(IN)    :: ider1
+!!     Integer,         Intent(IN)    :: ider2
+!!     Integer,         Intent(IN)    :: iside1
+!!     Integer,         Intent(IN)    :: iside2
+!!     Real(REAL64),    Intent(IN)    :: epar(*)
+!!     Integer,         Intent(INOUT) :: ileft1  
+!!     Integer,         Intent(INOUT) :: ileft2  
+!!     Real(REAL64),    Intent(INOUT) :: eder(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1506 -------------------------------------
+
+  Subroutine s1506(ps1, ider, m1, x, m2, y, eder, norm, jstat)
+
+!! PURPOSE
+!!   s1506 - Evaluate the surface pointed at by ps1 over an m1 * m2 grid of
+!!           points (x(i),y(j)). Compute ider derivatives and normals if 
+!!           suitable.
+
+!! INTERFACE
+!!   Subroutine s1506(ps1, ider, m1, x, m2, y, eder, norm, jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: ps1 
+!!     Integer,         Intent(IN)    :: ider
+!!     Integer,         Intent(IN)    :: m1 
+!!     Real(REAL64),    Intent(IN)    :: x(*)
+!!     Integer,         Intent(IN)    :: m2 
+!!     Real(REAL64),    Intent(IN)    :: y(*)
+!!     Real(REAL64),    Intent(INOUT) :: eder(*)
+!!     Real(REAL64),    Intent(INOUT) :: norm(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1711 -------------------------------------
+
+  Subroutine s1711(surf, pardir, parval, newsurf1, newsurf2, stat) 
+
+!! PURPOSE
+!!   s1711 - Subdivide a surface along a given internal parameter line.
+
+!! INTERFACE
+!!   Subroutine s1711(surf, pardir, parval, newsurf1, newsurf2, stat) 
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Integer,         Intent(IN)    :: pardir
+!!     Real(REAL64),    Intent(IN)    :: parval
+!!     Type(SISLsurf),  Intent(INOUT) :: newsurf1
+!!     Type(SISLsurf),  Intent(INOUT) :: newsurf2
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1025 -------------------------------------
+
+  Subroutine s1025(ps, epar1, inpar1, epar2, inpar2, rsnew, jstat) 
+
+!! PURPOSE
+!!   s1025 - Insert a given set of knots in each parameter direction into the
+!!           description of a surface.
+!!           NOTE : When the surface is periodic in one direction, the input
+!!           parameter values in this direction must lie in the half-open 
+!!           interval (et(kk), et(kn+1)), the function will automatically update
+!!           the extra knots and coefficients.
+
+!! INTERFACE
+!!   Subroutine s1025(ps, epar1, inpar1, epar2, inpar2, rsnew, jstat) 
+!!     Type(SISLsurf),  Intent(IN)    :: ps 
+!!     Real(REAL64),    Intent(IN)    :: epar1(*) 
+!!     Integer,         Intent(IN)    :: inpar1 
+!!     Real(REAL64),    Intent(IN)    :: epar2(*) 
+!!     Integer,         Intent(IN)    :: inpar2 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsnew
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1439 -------------------------------------
+
+  Subroutine s1439(ps1, apar, idirec, rcurve, jstat) 
+
+!! PURPOSE
+!!   s1439 - Make a constant parameter curve along a given parameter direc-
+!!           tion in a surface.
+
+!! INTERFACE
+!!   Subroutine s1439(ps1, apar, idirec, rcurve, jstat) 
+!!     Type(SISLsurf),  Intent(IN)    :: ps1 
+!!     Real(REAL64),    Intent(IN)    :: apar 
+!!     Integer,         Intent(IN)    :: idirec 
+!!     Type(SISLcurve), Intent(INOUT) :: rcurve
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1383 -------------------------------------
+
+  Subroutine s1383(surf, curve, epsge, maxstep, der, newcurve1, newcurve2,     &
+                   newcurve3, stat) 
+
+!! PURPOSE
+!!   s1383 - To create a 3D approximation to the curve in a surface, traced
+!!           out by a curve in the parameter plane. The output is represented
+!!           as a B-spline curve.
+
+!! INTERFACE
+!!   Subroutine s1383(surf, curve, epsge, maxstep, der, newcurve1, newcurve2, &
+!!                    newcurve3, stat) 
+!!     Type(SISLsurf),  Intent(IN)    :: surf 
+!!     Type(SISLcurve), Intent(IN)    :: curve 
+!!     Real(REAL64),    Intent(IN)    :: epsge 
+!!     Real(REAL64),    Intent(IN)    :: maxstep 
+!!     Integer,         Intent(IN)    :: der 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve1 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve2 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve3 
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1001 -------------------------------------
+
+  Subroutine s1001(ps, min1, min2, max1, max2, rsnew, jstat) 
+
+!! PURPOSE
+!!   s1001 - To pick a part of a surface. The surface produced will always be
+!!           k-regular, i.e. with k-tupple start/end knots.
+
+!! INTERFACE
+!!   Subroutine s1001(ps, min1, min2, max1, max2, rsnew, jstat) 
+!!     Type(SISLsurf),  Intent(IN)    :: ps 
+!!     Real(REAL64),    Intent(IN)    :: min1 
+!!     Real(REAL64),    Intent(IN)    :: min2 
+!!     Real(REAL64),    Intent(IN)    :: max1 
+!!     Real(REAL64),    Intent(IN)    :: max2 
+!!     Type(SISLsurf),  Intent(INOUT) :: rsnew
+!!     Integer,         Intent(INOUT) :: jstat
+ 
+
+!---------------------------------- s1440 -------------------------------------
+
+  Subroutine s1440(surf, newsurf, stat) 
+
+!! PURPOSE
+!!   s1440 - Interchange the two parameter directions used in the mathemat-
+!!           ical description of a surface and thereby change the direction of
+!!           the normal vector of the surface.
+
+!! INTERFACE
+!!   Subroutine s1440(surf, newsurf, stat) 
+!!     Type(SISLsurf),  Intent(IN)    :: surf
+!!     Type(SISLsurf),  Intent(INOUT) :: newsurf
+!!     Integer,         Intent(INOUT) :: stat
+
+
+10.0 Data Reduction
+
+
+!---------------------------------- s1940 -------------------------------------
+
+  Subroutine s1940(oldcurve, eps, startfix, endfix, iopen, itmax, newcurve,    &
+                   maxerr, stat)
+
+!! PURPOSE
+!!   s1940 - To remove as many knots as possible from a spline curve without
+!!           perturbing the curve more than a given tolerance.
+
+!! INTERFACE
+!!   Subroutine s1940(oldcurve, eps, startfix, endfix, iopen, itmax, newcurve, &
+!!                    maxerr, stat)
+!!     Type(SISLcurve), Intent(IN)    :: oldcurve
+!!     Real(REAL64),    Intent(IN)    :: eps(*)
+!!     Integer,         Intent(IN)    :: startfix 
+!!     Integer,         Intent(IN)    :: endfix 
+!!     Integer,         Intent(IN)    :: iopen 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Type(SISLcurve), Intent(INOUT) :: newcurve
+!!     Real(REAL64),    Intent(INOUT) :: maxerr(*)
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1961 -------------------------------------
+
+  Subroutine s1961(ep, im, idim, ipar, epar, eeps, ilend, irend, iopen,        &
+                   afctol, itmax, ik, rc, emxerr, jstat)
+
+!! PURPOSE
+!!   s1961 - To compute a spline-approximation to the data given by the points
+!!           ep, and represent it as a B-spline curve with parameterization de-
+!!           termined by the parameter ipar. The approximation is determined
+!!           by first forming the piecewise linear interpolant to the data, and
+!!           then performing knot removal on this initial approximation.
+
+!! INTERFACE
+!!   Subroutine s1961(ep, im, idim, ipar, epar, eeps, ilend, irend, iopen,     &
+!!                    afctol, itmax, ik, rc, emxerr, jstat)
+!!     Integer,         Intent(IN)    :: im 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Real(REAL64),    Intent(IN)    :: epar(:)
+!!     Real(REAL64),    Intent(IN)    :: eeps(*)
+!!     Integer,         Intent(IN)    :: ilend 
+!!     Integer,         Intent(IN)    :: irend 
+!!     Integer,         Intent(IN)    :: iopen 
+!!     Real(REAL64),    Intent(IN)    :: afctol 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Integer,         Intent(IN)    :: ik 
+!!     Type(SISLcurve), Intent(INOUT) :: rc 
+!!     Real(REAL64),    Intent(INOUT) :: emxerr(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1962 -------------------------------------
+
+  Subroutine s1962(ep, ev, im, idim, ipar, epar, eeps, ilend, irend, iopen,    &
+                   itmax, rc, emxerr, jstat)
+
+!! PURPOSE
+!!   s1962 - To compute the approximation to the data given by the points
+!!           ep and the derivatives (tangents) ev, and represent it as a B-
+!!           spline curve with parametrization determined by the parameter
+!!           ipar. The approximation is determined by first forming the cubic
+!!           hermite interpolant to the data, and then performing knot removal
+!!           on this initial approximation.
+
+!! INTERFACE
+!!   Subroutine s1962(ep, ev, im, idim, ipar, epar, eeps, ilend, irend, iopen,    &
+!!                    itmax, rc, emxerr, jstat)
+!!     Real(REAL64),    Intent(IN)    :: ep(*)
+!!     Real(REAL64),    Intent(IN)    :: ev(*)
+!!     Integer,         Intent(IN)    :: im 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Real(REAL64),    Intent(IN)    :: epar(:)
+!!     Real(REAL64),    Intent(IN)    :: eeps(*)
+!!     Integer,         Intent(IN)    :: ilend 
+!!     Integer,         Intent(IN)    :: irend 
+!!     Integer,         Intent(IN)    :: iopen 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Type(SISLcurve), Intent(INOUT) :: rc 
+!!     Real(REAL64),    Intent(INOUT) :: emxerr(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+!---------------------------------- s1963 -------------------------------------
+
+  Subroutine s1963(pc, eeps, ilend, irend, iopen, itmax, rc, emxerr, jstat)
+
+!! PURPOSE
+!!   s1963 - To approximate the input spline curve by a cubic spline curve with
+!!           error less than eeps in each of the kdim components.
+
+!! INTERFACE
+!!   Subroutine s1963(pc, eeps, ilend, irend, iopen, itmax, rc, emxerr, jstat)
+!!     Type(SISLcurve), Intent(IN)    :: pc 
+!!     Real(REAL64),    Intent(IN)    :: eeps(*)
+!!     Integer,         Intent(IN)    :: ilend 
+!!     Integer,         Intent(IN)    :: irend 
+!!     Integer,         Intent(IN)    :: iopen 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Type(SISLcurve), Intent(INOUT) :: rc 
+!!     Real(REAL64),    Intent(INOUT) :: emxerr(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1965 -------------------------------------
+
+  Subroutine s1965(oldsurf, eps, edgefix, iopen1, iopen2, edgeps, opt, itmax,  &
+                   newsurf, maxerr, stat)
+
+!! PURPOSE
+!!   s1965 - To remove as many knots as possible from a spline surface without
+!!           perturbing the surface more than the given tolerance. The error
+!!           in continuity over the start and end of a closed or periodic surface
+!!           is only guaranteed to be within edgeps.
+
+!! INTERFACE
+!!   Subroutine s1965(oldsurf, eps, edgefix, iopen1, iopen2, edgeps, opt,   &
+!!                    itmax, newsurf, maxerr, stat)
+!!     Type(SISLsurf),  Intent(IN)    :: oldsurf
+!!     Real(REAL64),    Intent(IN)    :: eps(*)
+!!     Integer,         Intent(IN)    :: edgefix(4) 
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Real(REAL64),    Intent(IN)    :: edgeps(*)
+!!     Integer,         Intent(IN)    :: opt 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Type(SISLsurf),  Intent(INOUT) :: newsurf
+!!     Real(REAL64),    Intent(INOUT) :: maxerr(*)
+!!     Integer,         Intent(INOUT) :: stat
+
+
+!---------------------------------- s1966 -------------------------------------
+
+  Subroutine s1966(ep, im1, im2, idim, ipar, epar1, epar2, eeps, nend, iopen1, &
+                   iopen2, edgeps, afctol, iopt, itmax, ik1, ik2, rs, emxerr,  &
+                   jstat)
+
+!! PURPOSE
+!!   s1966 - To compute a tensor-product spline-approximation of order
+!!           (ik1,ik2) to the rectangular array of idim-dimensional points given
+!!           by ep.
+
+!! INTERFACE
+!!   Subroutine s1966(ep, im1, im2, idim, ipar, epar1, epar2, eeps, nend,      &
+!!                    iopen1, iopen2, edgeps, afctol, iopt, itmax, ik1, ik2,   &
+!!                    rs, emxerr, jstat)
+!!     Real(REAL64),    Intent(IN)    :: ep(*)
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Real(REAL64),    Intent(IN)    :: epar1(:)
+!!     Real(REAL64),    Intent(IN)    :: epar2(:)
+!!     Real(REAL64),    Intent(IN)    :: eeps(*)
+!!     Integer,         Intent(IN)    :: nend(4)
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Real(REAL64),    Intent(IN)    :: edgeps(*) 
+!!     Real(REAL64),    Intent(IN)    :: afctol 
+!!     Integer,         Intent(IN)    :: iopt 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Integer,         Intent(IN)    :: ik1 
+!!     Integer,         Intent(IN)    :: ik2 
+!!     Type(SISLsurf),  Intent(INOUT) :: rs 
+!!     Real(REAL64),    Intent(INOUT) :: emxerr(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1967 -------------------------------------
+
+  Subroutine s1967(ep, etang1, etang2, eder11, im1, im2, idim, ipar, epar1,    &
+                   epar2, eeps, nend, iopen1, iopen2, edgeps, iopt, itmax, rs, &
+                   emxerr, jstat)
+
+!! PURPOSE
+!!   s1967 - To compute a bicubic hermite spline-approximation to the position
+!!           and derivative data given by ep,etang1,etang2 and eder11.
+
+!! INTERFACE
+!!   Subroutine s1967(ep, etang1, etang2, eder11, im1, im2, idim, ipar,        &
+!!                    epar1, epar2, eeps, nend, iopen1, iopen2, edgeps, iopt,  &
+!!                    itmax, rs, emxerr, jstat)
+!!     Real(REAL64),    Intent(IN)    :: ep(*)
+!!     Real(REAL64),    Intent(IN)    :: etang1(*)
+!!     Real(REAL64),    Intent(IN)    :: etang2(*)
+!!     Real(REAL64),    Intent(IN)    :: eder11(*)
+!!     Integer,         Intent(IN)    :: im1 
+!!     Integer,         Intent(IN)    :: im2 
+!!     Integer,         Intent(IN)    :: idim 
+!!     Integer,         Intent(IN)    :: ipar 
+!!     Real(REAL64),    Intent(IN)    :: epar1(:)
+!!     Real(REAL64),    Intent(IN)    :: epar2(:)
+!!     Real(REAL64),    Intent(IN)    :: eeps(*)
+!!     Integer,         Intent(IN)    :: nend(4)
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Real(REAL64),    Intent(IN)    :: edgeps(*) 
+!!     Integer,         Intent(IN)    :: iopt 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Type(SISLsurf),  Intent(INOUT) :: rs 
+!!     Real(REAL64),    Intent(INOUT) :: emxerr(*)
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+!---------------------------------- s1968 -------------------------------------
+
+  Subroutine s1968(ps, eeps, nend, iopen1, iopen2, edgeps, iopt, itmax, rs,    &
+                   jstat)
+
+!! PURPOSE
+!!   s1968 - To compute a cubic tensor-product spline approximation to a
+!!           given tensor product spline surface of arbitrary order, with er-
+!!           ror less than eeps in each of the idim components. The error in
+!!           continuity over the start and end of a closed or periodic surface
+!!           is only guaranteed to be within edgeps.
+
+!! INTERFACE
+!!   Subroutine s1968(ps, eeps, nend, iopen1, iopen2, edgeps, iopt, itmax, rs,&
+!!                    jstat)
+!!     Type(SISLsurf),  Intent(IN)    :: ps
+!!     Real(REAL64),    Intent(IN)    :: eeps(*)
+!!     Integer,         Intent(IN)    :: nend(4) 
+!!     Integer,         Intent(IN)    :: iopen1 
+!!     Integer,         Intent(IN)    :: iopen2 
+!!     Real(REAL64),    Intent(IN)    :: edgeps(*)
+!!     Integer,         Intent(IN)    :: iopt 
+!!     Integer,         Intent(IN)    :: itmax 
+!!     Type(SISLsurf),  Intent(INOUT) :: rs
+!!     Integer,         Intent(INOUT) :: jstat
+
+
+11.0 forSISL IO
+
+
+  Function determine_SISL_instance_type(is) RESULT(itype)
+
+!! PURPOSE 
+!!   Reads header record of input files to determine in file contains the
+!!   appropriate data type for curve or surface io
+
+!! INTERFACE
+!!   Function determine_SISL_instance_type(is) RESULT(itype)
+!!     Integer, Intent(IN) :: is
+!!     Integer             :: itype 
+
+
+  Subroutine read_basis(is, n, k, knots)
+
+!! PURPOSE
+!!   Reads knot vector information for curve or surface objects. All io is done
+!!   using Fortran list directed IO
+
+!! INTERFACE
+!!   Subroutine read_basis(is, n, k, knots)
+!!     Integer,                    Intent(IN)    :: is
+!!     Integer,                    Intent(INOUT) :: n, k
+!!     Real(REAL64),  ALLOCATABLE, Intent(INOUT) :: knots(:)
+
+
+  Subroutine write_basis(os, n, k, knots)
+
+!! PURPOSE
+!!   Writes knot vector data for curve and surface objects. Integers are
+!!   written using "i0,' ',i0" format. Reals are written using "500(g0.7,' ')"
+!!   format
+
+!! INTERFACE
+!!   Subroutine write_basis(os, n, k, knots)
+!!     Integer,        Intent(IN) :: os
+!!     Integer,        Intent(IN) :: n, k
+!!     Real(REAL64),   Intent(IN) :: knots(:)
+
+
+  Subroutine readSISLSurface(SISL_file, surf)
+
+!! PURPOSE
+!!   Read SISL surface object data
+
+!! INTERFACE
+!!   Subroutine readSISLSurface(SISL_file, surf)
+!!     Integer,        Intent(IN)    :: SISL_file
+!!     Type(SISLsurf), Intent(INOUT) :: surf
+ 
+
+  Subroutine writeSISLSurface(surf, SISL_file)
+
+!! PURPOSE
+!!   Write SISL surface object data
+
+!! INTERFACE
+!!   Subroutine writeSISLSurface(surf, SISL_file)
+!!     Type(SISLsurf), Intent(IN) :: surf
+!!     Integer,        Intent(IN) :: SISL_file
+ 
+
+  Subroutine writeSISLCurve(curve, SISL_file)
+
+!! PURPOSE
+!!   Write SISL curve object data
+
+!! INTERFACE
+!!   Subroutine writeSISLCurve(curve, SISL_file)
+!!     Type(SISLcurve), Intent(IN) :: curve 
+!!     Integer,         Intent(IN) :: SISL_file
+ 
+
+  Subroutine readSISLCurve(SISL_file, curve)
+
+!! PURPOSE
+!!   Read SISL curve object data
+
+!! INTERFACE
+!!   Subroutine readSISLcurve(SISL_file, curve)
+!!     Integer,         Intent(IN)     :: SISL_file
+!!     Type(SISLcurve), Intent(INOUT) :: curve 
+ 
+  Subroutine writeSISLPoints(num_points, coords, SISL_file)
+
+!! PURPOSE
+!!   Write point data generated by SISL routines
+
+!! INTERFACE
+!!   Subroutine WriteSISLPoints(SISL_file, coords)
+!!     Integer,      Intent(IN)         :: num_points
+!!     Real(REAL64), TARGET, Intent(IN) :: coords(:)
+!!     Integer,              Intent(IN) :: SISL_file
+
+
+  Subroutine readSISLPoints(coords, SISL_file)
+
+!! PURPOSE
+!!   Read point data generated by SISL routines
+
+!! INTERFACE
+!!   Subroutine readSISLPoints(coords, SISL_file)
+!!     Real(REAL64), ALLOCATABLE, Intent(INOUT) :: coords(:)
+!!     Integer,                   Intent(IN)    :: SISL_file
+

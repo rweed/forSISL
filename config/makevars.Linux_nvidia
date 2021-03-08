@@ -1,0 +1,17 @@
+FC=$(FCOMPILER)
+CC=$(CCOMPILER)
+LD=$(FC)
+FPP=$(FC) -E
+SO=so
+MAKE=make
+INCLUDES=-I. -I$(INCPATH) -I$(MODPATH)
+DEFINES= $(DEFINEVAL) $(DEBUGDEF) $(EXO_REAL_INT)
+FCFLAGS= $(ARCHTYPE) $(FOPTFLAGS) $(REALLOCLHS) $(WARN) -fPIC -traceback -msse4
+CFLAGS= $(COPTFLAGS) -traceback -fPIC
+FPEFLAGS=
+DYNLIB=$(FC) -shared -o
+MOD=mod
+SMOD=smod
+RULES=Linux_nvidia
+AR=ar rcs
+RANLIB=ranlib

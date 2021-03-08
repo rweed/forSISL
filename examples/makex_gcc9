@@ -1,0 +1,3 @@
+#!/bin/bash
+
+gfortran-9 -o $1.x -fPIC -DDEBUG -O2 -g -I../modules $1.F90 ../lib/forsisl.a $SISL_LIBPATH/sisl.a

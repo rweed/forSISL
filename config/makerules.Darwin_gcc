@@ -1,0 +1,34 @@
+SHELL = /bin/sh
+
+.SUFFIXES:
+.SUFFIXES: .o .F90 .f90 .f .F .c
+
+.F90.o:
+	$(FC) -c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.f90.o:
+	$(FC) -c $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.F.o:
+	$(FC) -c $(DEFINES) $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.f.o:
+	$(FC) -c $(INCLUDES) $(FCFLAGS) $< -o $@
+
+.c.o:
+	$(CC) -c $(INCLUDES) $(CCFLAGS) $< -o $@
+
+#JacobiGaussLobattoUtils.o: JacobiGaussLobattoUtils.F90
+#	$(FC) -c $(INCLUDES) $(FCO1FLAGS) JacobiGaussLobattoUtils.F90
+
+#NDGutils.o: NDGutils.F90
+#	$(FC) -c $(INCLUDES) $(FCO1FLAGS) NDGutils.F90
+
+NDG1D.o: NDG1D.F90
+	$(FC) -c $(INCLUDES) $(FCO1FLAGS) NDG1D.F90
+
+NDG2D.o: NDG2D.F90
+	$(FC) -c $(INCLUDES) $(FCO1FLAGS) NDG2D.F90
+
+clean:
+	rm -rf *.$(MOD) *.$(SMOD) *.o *.a *.optrpt ./*~ ./*.ps */*.ps */*.o */*.$(MOD) */*.$(SMOD) */*~ */*.a ./*.swp ./*.optrpt 

@@ -1,0 +1,17 @@
+FC=$(FCOMPILER)
+CC=$(CCOMPILER)
+LD=$(FC)
+FPP=$(FC) -E
+MAKE=make
+INCLUDES=-I. -I$(INCPATH) -I$(MODPATH)
+DEFINES= $(DEFINEVAL) $(DEBUGDEF)
+FCFLAGS= $(FOPTFLAGS) -m64 -msse4 -fbacktrace $(REALLOCLHS) -fPIC $(WARN)
+CFLAGS= $(COPTFLAGS) -fPIC -m64
+DYNLIB=$(FC) -shared -o
+FPEFlAGS=-ffpe-summary=none
+SO=so
+MOD=mod
+SMOD=smod
+RULES=Linux_gcc
+AR=ar rcs
+RANLIB=ranlib

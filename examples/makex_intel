@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ifort -o $1.x -fPIC -DDEBUG -traceback -O0 -g -I../modules $1.F90 ../lib/forsisl.a $SISL_LIBPATH/sisl.a
