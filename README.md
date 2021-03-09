@@ -39,7 +39,7 @@ developer.
 Build instructions are given in the accompanying BUILD_INSTRUCTIONS file
 
 The SISL C library software is available from:
-https://github/SINTEF-Geometry/SISL. Users must build the SISL C library and
+https://github.com/SINTEF-Geometry/SISL. Users must build the SISL C library and
 link it into their projects prior to attempting to use the forSISL interfaces.
 
 ## Contact
