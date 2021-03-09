@@ -509,6 +509,7 @@ Contains
 
     Type(SISLIntCurve), Target, Intent(INOUT) :: intCurve
 
+    Integer :: ipoint, ipar1, ipar2
     Type(c_SISLIntCurve), Pointer :: cicurve
 
     cicurve => NULL()
@@ -524,12 +525,15 @@ Contains
        intCurve%ipar2  = cicurve%ipar2
        intCurve%itype  = cicurve%itype
        intCurve%pretop = cicurve%pretop
+       ipoint                     = intCurve%ipoint
+       ipar1                      = intCurve%ipar1
+       ipar2                      = intCurve%ipar2
 
        If (C_ASSOCIATED(cicurve%epar1)) Then
-         Call C_F_Pointer(cicurve%epar1, intCurve%epar1, [Intcurve%ipar1])
+         Call C_F_Pointer(cicurve%epar1, intCurve%epar1, [ipoint*ipar1])
        EndIf 
        If (C_ASSOCIATED(cicurve%epar2)) Then
-         Call C_F_Pointer(cicurve%epar2, intCurve%epar2, [Intcurve%ipar2])
+         Call C_F_Pointer(cicurve%epar2, intCurve%epar2, [ipoint*ipar2])
        EndIf
        If (C_ASSOCIATED(cicurve%pgeom)) Then
          intCurve%pgeom%cptr = cicurve%pgeom
