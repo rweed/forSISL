@@ -144,7 +144,7 @@ Program example13
   Read(*,'(A)') ans
   If (ans == "q") Then
     Print *,''
-    Print *,' Adios !!! '
+    STOP ' Adios !!! '
   End If
 
   Open(newunit=is_sf1, FILE=IN_FILE_SURFACE_1, FORM="FORMATTED",               &
